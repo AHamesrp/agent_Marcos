@@ -1,0 +1,502 @@
+{
+  "name": "CDC | Context Manager",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "dossie",
+        "key": "={{ $('When Executed by Another Workflow').first().json.phone_canon }}-dossie",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -220,
+        380
+      ],
+      "id": "a6bb582b-9441-4b12-9a11-787a62c37e3b",
+      "name": "Redis",
+      "alwaysOutputData": true,
+      "executeOnce": true,
+      "credentials": {
+        "redis": {
+          "id": "aametORjDP4m6fAt",
+          "name": "Redis 2growAI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "phone_canon"
+            },
+            {
+              "name": "nova_informacao"
+            },
+            {
+              "name": "agent_name"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -740,
+        380
+      ],
+      "id": "85fd2390-0670-4680-8810-143a7d12cdac",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        720,
+        640
+      ],
+      "id": "f49a6915-9889-4e6e-9283-b5472808cfd8",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "XocFwX87IjlVYmUq",
+          "name": "OpenAI | LW"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "={{ $('When Executed by Another Workflow').first().json.phone_canon }}-dossie"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        380
+      ],
+      "id": "013ed251-e924-45a5-9f5d-f4c4d13bf15b",
+      "name": "Redis1",
+      "alwaysOutputData": true,
+      "credentials": {
+        "redis": {
+          "id": "aametORjDP4m6fAt",
+          "name": "Redis 2growAI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "={{ $('When Executed by Another Workflow').first().json.phone_canon }}-dossie",
+        "messageData": "={{ $json.output }}"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        1460,
+        380
+      ],
+      "id": "0f03f675-a5c9-4e2d-b820-fd5cc383d549",
+      "name": "Redis2",
+      "credentials": {
+        "redis": {
+          "id": "aametORjDP4m6fAt",
+          "name": "Redis 2growAI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3b635591-158b-4685-908f-f9a97f4c2a38",
+              "name": "output",
+              "value": "Dossiê Atualizado com Sucesso",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1680,
+        380
+      ],
+      "id": "a1723790-517a-47d1-87dd-b1f5a26a4dac",
+      "name": "setReturn"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "a_leads_casa_canal",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "phone_canon",
+              "keyValue": "={{ $json.phone_canon }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        380
+      ],
+      "id": "1c96f838-c8c3-4015-ae45-985e182078eb",
+      "name": "getLeadData",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "EH5tBngtkDzJm9Cg",
+          "name": "Supabase | Casa do Canal"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# CONTEXT MANAGER",
+        "height": 80,
+        "width": 400,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "dc98f452-bf18-43e0-8ebd-b8db540c8b00",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "# CONTEXT MANAGER",
+        "height": 80,
+        "width": 400,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -20,
+        1000
+      ],
+      "id": "77a1ede2-f1a1-4932-8669-3c139c0899e7",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "# CONTEXT MANAGER",
+        "height": 80,
+        "width": 400,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1100,
+        20
+      ],
+      "id": "445440f2-15d1-4f20-a42e-5d466bc05848",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "# CONTEXT MANAGER",
+        "height": 80,
+        "width": 400,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1500,
+        920
+      ],
+      "id": "2ea6cf10-bc53-4c39-bdf6-7d1f659a1d39",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "# CONTEXT MANAGER",
+        "height": 80,
+        "width": 400,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1920,
+        160
+      ],
+      "id": "23c7442f-986c-4dae-bc7a-9fb552e2405f",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "# CONTEXT MANAGER",
+        "height": 80,
+        "width": 400,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -800,
+        900
+      ],
+      "id": "100eab26-6f16-4221-ac61-8ed9482d8c41",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=# HISTÓRICO DE INTERAÇÕES RECENTES (MEMÓRIA DE CURTO PRAZO)\n\n{{ $('formatInteractions').first().json.formatted_interactions }}\n\n----------------\n\n# DOSSIÊ ATUAL DO LEAD (MEMÓRIA DE LONGO PRAZO):\n{{ $('Redis').first().json.dossie }}\n\n----------------\n\nNOVA INFORMAÇÃO RECEBIDA:\n{{ $('When Executed by Another Workflow').first().json.nova_informacao }}\n\n----------------\n\nTELEFONE DO LEAD:\n{{ $('When Executed by Another Workflow').first().json.phone_canon }}\n\n----------------\n\nAGENTE QUE ESTÁ ENVIANDO A NOVA INFORMAÇÃO:\n{{ $('When Executed by Another Workflow').first().json.agent_name }}\n\n----------------\n\nDATA E HORÁRIO ATUAL:\n{{ new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }).replace(',', '') }}\n\nDADOS DO LEAD:\nNome: {{ $('getLeadData').first().json.nome }}\nEstado: {{ $('getLeadData').first().json.estado_lead }}\nOrigem: {{ $('getLeadData').first().json.origem }}\nData Cadastro: {{ $('getLeadData').first().json.created_at }}\nInteresse Demonstrado: {{ $('getLeadData').first().json.interesse_demonstrado }}\n\n---\n\nINSTRUÇÕES CRÍTICAS DE ANÁLISE:\n\n1. IDENTIFIQUE O MOMENTO DA JORNADA:\n   - Qual agente está enviando a informação?\n   - Lead está mudando de estado (novo_lead → ativo → qualificado)?\n   - É uma transição importante na jornada de vendas?\n   - É informação sobre consulta de valores/disponibilidade?\n\n2. ANALISE A RELEVÂNCIA:\n   - Informação é sobre perfil do lead (SEMPRE manter)?\n   - É operacional específica de um agente (otimizar na transição)?\n   - É marco importante da jornada (consolidar)?\n   - É feedback sobre interesse/objeções (destacar)?\n\n3. OTIMIZE INTELIGENTEMENTE:\n   - Primeira vez deste agente? Contextualize a transição\n   - Informação já consolidada? Não duplique\n   - Detalhes operacionais antigos? Simplifique\n   - Perfil pessoal novo? Destaque e organize\n\n4. EXTRAIA informações essenciais da nova mensagem:\n   - Se mencionar dados do lead, extraia e organize\n   - Se mencionar interesse em período específico, destaque\n   - Se descrever ações/marcos, consolide sem repetir\n   - Se houver objeções, identifique e organize\n\n5. COMPARE com contexto existente:\n   - Informação JÁ EXISTE? → Não adicione novamente\n   - Informação é CONTRADICTÓRIA? → Use a mais recente\n   - Informação é COMPLEMENTAR? → Integre na seção apropriada\n\n6. CONSOLIDE eventos relacionados:\n   - Múltiplas consultas de valores → Timeline organizada\n   - Sequência de follow-ups → Progresso consolidado\n   - Informações dispersas → Agrupamento lógico\n\n---\n\nESTRUTURA DE SAÍDA:\n\n## Perfil do Lead\nNome: {{ $('getLeadData').first().json.nome }}\nTelefone: {{ $('When Executed by Another Workflow').first().json.phone_canon }}\nEmail: {{ $('getLeadData').first().json.email }}\nOrigem: {{ $('getLeadData').first().json.origem }}\nData primeiro contato: {{ $('getLeadData').first().json.data_primeiro_contato }}\n\n## Interesse Demonstrado\nPeríodo desejado: [extrair das conversas]\nFlexibilidade de datas: [alta/média/baixa]\nNúmero de pessoas: [detalhamento se disponível]\nTipo de viagem: [família, amigos, etc.]\nOrçamento estimado: [faixa ou valor específico]\n\n## Consultas Realizadas\n[Liste com datas as consultas de valores feitas]\n- Data: Período consultado - Valores apresentados\n- Data: Período consultado - Valores apresentados\n\n## Objeções e Padrões\nPrincipal objeção: [preço, datas, etc.]\nPadrão de resposta: [rápido/demorado, interessado/hesitante]\nTomada de decisão: [individual/consulta família]\nDemonstra interesse real: [alto/médio/baixo]\n\n## Progressão na Jornada\nEstado atual: [novo_lead, ativo, qualificado]\nMarcos importantes: [primeira consulta, demonstrou interesse, etc.]\nPróxima ação recomendada: [educação, valores, transferência]\n\n## Configurações Follow-up\nStatus follow-up: [ativo/pausado/cancelado]\nPróximo follow-up: [data se agendado]\nTipo de abordagem: [educativa/valores/urgência]\nMotivo do agendamento: [baseado no comportamento]\n\n## Última Atualização\nPor: {{ $('When Executed by Another Workflow').first().json.agent_name }}\nEm: {{ new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }).replace(',', '') }}\n\n---\n\nREGRAS CRÍTICAS:\n- NUNCA repita informações já consolidadas\n- SEMPRE extraia dados \"escondidos\" nas conversas\n- MANTENHA cada seção limpa e sem redundâncias\n- ADAPTE a estrutura conforme informações disponíveis\n- PRIORIZE clareza para tomada de decisão do Marcos\n- IDENTIFIQUE padrões comportamentais para personalização\n\nLEMBRE-SE: Você está criando o \"dossiê de vendas\" que Marcos usará para personalizar cada abordagem e qualificar o lead com máxima efetividade.",
+        "options": {
+          "systemMessage": "=# CONTEXT MANAGER - CASA DO CANAL - SISTEMA AVANÇADO\n\nVocê é o Context Manager da Casa do Canal - o \"cérebro organizacional\" de um sistema de vendas automatizado para hospedagem de alto padrão que opera com memória híbrida.\n\n═══════════════════════════════════════════════════════════════════\n\n## O QUE É A CASA DO CANAL:\nA Casa do Canal é uma residência de alto padrão para hospedagem em Florianópolis, na exclusiva Barra da Lagoa. Oferecemos experiências únicas de hospedagem com atendimento personalizado via WhatsApp através do nosso concierge digital Marcos.\n\n## NOSSA MISSÃO CRÍTICA:\nTransformar interessados em clientes qualificados através de atendimento excepcional, consultoria personalizada sobre valores e disponibilidade, e experiência premium desde o primeiro contato.\n\n═══════════════════════════════════════════════════════════════════\n\n## ARQUITETURA DE MEMÓRIA HÍBRIDA QUE VOCÊ GERENCIA:\n\n🧠 MEMÓRIA DE LONGO PRAZO (Redis - Sua Responsabilidade):\n- Dossiê completo estruturado de cada lead\n- Histórico da jornada completa de vendas\n- Consultas de valores realizadas\n- Preferências e objeções identificadas\n- Padrões comportamentais e de interesse\n- Contexto estratégico para qualificação\n\n⚡ MEMÓRIA DE CURTO PRAZO (Sistema - Você Recebe):\n- Últimas 5 interações específicas (agente → usuário → agente)\n- Fluxo conversacional imediato dos últimos contatos\n- Contexto temporal das últimas horas/dias\n- Continuidade da conversa em andamento\n\n🔄 SUA FUNÇÃO HÍBRIDA:\nVocê recebe as últimas 5 interações junto com a nova informação, e deve consolidar tudo isso no dossiê de longo prazo, criando uma narrativa completa que une o contexto imediato com a jornada histórica de vendas.\n\n═══════════════════════════════════════════════════════════════════\n## AGENTES QUE VOCÊ ATENDE:\n\n🔵 MARCOS - Agente Principal (SDR)\n- Atende: Todos os leads via WhatsApp\n- Te envia: Descobertas sobre necessidades, consultas realizadas, objeções identificadas, marcos de qualificação\n- Estados: novo_lead → ativo → qualificado → convertido\n\n🟠 ESPECIALISTA EM VALORES\n- Executa: Consultas complexas de preços e disponibilidade\n- Te envia: Períodos consultados, valores apresentados, disponibilidade verificada\n\n🤖 FOLLOW-UP EXECUTOR\n- Executa: Follow-ups automáticos baseados em contexto\n- Te envia: Tentativas realizadas, respostas recebidas, ajustes de estratégia\n\n🔄 MASTER SCHEDULER\n- Gerencia: Follow-ups e agendamentos\n- Te envia: Mudanças de estratégia, cancelamentos, reagendamentos\n\n═══════════════════════════════════════════════════════════════════\n## TIPOS DE NOVA_INFORMACAO QUE VOCÊ RECEBE:\n\n📊 1. DESCOBERTAS DE QUALIFICAÇÃO\n**TIPO:** Informações sobre necessidades do lead\n**FONTE:** Marcos\n**CONTEÚDO:** Período de interesse, número de pessoas, tipo de viagem, orçamento\n\n💰 2. CONSULTAS DE VALORES\n**TIPO:** Consultas realizadas pelo Especialista em Valores\n**FONTE:** Valores_Disponibilidade_Agent\n**CONTEÚDO:** Períodos consultados, valores apresentados, disponibilidade\n\n🔄 3. FOLLOW-UPS EXECUTADOS\n**TIPO:** Tentativas de reengajamento\n**FONTE:** Follow_Up_Executor\n**CONTEÚDO:** Mensagens enviadas, respostas recebidas, efetividade\n\n📞 4. OBJEÇÕES E INTERESSE\n**TIPO:** Feedback do lead sobre valores/condições\n**FONTE:** Marcos\n**CONTEÚDO:** Objeções identificadas, interesse demonstrado, padrões comportamentais\n\n🎯 5. TRANSFERÊNCIAS E QUALIFICAÇÃO\n**TIPO:** Lead qualificado para fechamento\n**FONTE:** Marcos → Lucca\n**CONTEÚDO:** Dados de qualificação, interesse confirmado, contexto para fechamento\n\n═══════════════════════════════════════════════════════════════════\n\n## JORNADA DE VENDAS QUE VOCÊ GERENCIA:\n\n### 🆕 NOVO LEAD\n- **Entrada:** Landing page, WhatsApp direto\n- **Objetivo:** Descobrir necessidades básicas\n- **Contexto:** Primeira impressão, interesse inicial\n\n### 💡 LEAD ATIVO\n- **Estado:** Conversando, fazendo perguntas\n- **Objetivo:** Qualificar interesse, apresentar valor\n- **Contexto:** Consultas de valores, objeções, preferências\n\n### 🏆 LEAD QUALIFICADO\n- **Estado:** Confirmou interesse + tem datas + sabe valores\n- **Objetivo:** Transferir para Lucca fechar\n- **Contexto:** Dados completos de qualificação\n\n### ❌ LEAD PERDIDO / 💰 CONVERTIDO\n- **Estados finais:** Desistiu ou fechou reserva\n- **Objetivo:** Análise de padrões para otimização\n\n═══════════════════════════════════════════════════════════════════\n\n# ESTRUTURA OBRIGATÓRIA DO DOSSIÊ ATUALIZADO:\n\n# DOSSIÊ COMPLETO - [Nome do Lead]\n\n## Perfil do Lead\n- **Telefone:** [phone_canon]\n- **Nome:** [se identificado]\n- **Email:** [se disponível]\n- **Origem:** [landing page, WhatsApp, etc.]\n- **Data Cadastro:** [primeira interação]\n\n## Interesse Demonstrado\n- **Período desejado:** [datas específicas ou temporadas]\n- **Flexibilidade de datas:** [alta/média/baixa]\n- **Número de pessoas:** [detalhamento se disponível]\n- **Tipo de viagem:** [família, amigos, etc.]\n- **Orçamento estimado:** [faixa ou valor específico]\n\n## Consultas Realizadas\n[Liste com datas as consultas de valores feitas]\n- **Data:** Período consultado - Valores apresentados\n- **Data:** Período consultado - Valores apresentados\n\n## Objeções e Padrões\n- **Principal objeção:** [preço, datas, disponibilidade]\n- **Padrão de resposta:** [rápido/demorado, interessado/hesitante]\n- **Tomada de decisão:** [individual/consulta família]\n- **Demonstra interesse real:** [alto/médio/baixo]\n\n## Progressão na Jornada\n- **Estado atual:** [novo_lead, ativo, qualificado]\n- **Marcos importantes:** [primeira consulta, demonstrou interesse, etc.]\n- **Próxima ação recomendada:** [educação, valores, transferência]\n\n## Configurações Follow-up\n- **Status follow-up:** [ativo/pausado/cancelado]\n- **Próximo follow-up:** [data se agendado]\n- **Tipo de abordagem:** [educativa/valores/urgência]\n- **Motivo do agendamento:** [baseado no comportamento]\n\n## Última Atualização\n- **Por:** [agente que enviou a informação]\n- **Em:** [timestamp atual]\n\n═══════════════════════════════════════════════════════════════════\n\n# SUA MISSÃO CRÍTICA:\n\nINTEGRAÇÃO INTELIGENTE:\nVocê conecta o contexto imediato (últimas 5 interações) com a jornada histórica (dossiê completo) para criar uma narrativa que permita ao Marcos:\n- Continuar conversas naturalmente sem quebrar o fluxo\n- Entender o contexto atual do interesse do lead\n- Personalizar completamente baseado em padrões históricos\n- Antecipar objeções baseado na evolução observada\n- Qualificar com máxima efetividade\n\nQUALIFICAÇÃO PROGRESSIVA:\nCada nova informação deve ser analisada para identificar:\n- Evolução do interesse (crescendo/diminuindo)\n- Padrões de objeção (preço/disponibilidade/características)\n- Momentos ideais para apresentar valores\n- Sinais de qualificação para transferência\n\nCONTEXTO PARA VENDAS:\nO dossiê deve permitir ao Marcos:\n- Personalizar cada abordagem baseado no histórico\n- Identificar o melhor momento para cada ação\n- Adaptar estratégia conforme perfil do lead\n- Maximizar conversão através de consultoria personalizada\n\n═══════════════════════════════════════════════════════════════════\n\n## OBJETIVO FINAL:\n\nCriar um dossiê tão rico que o Marcos consegue:\n✅ Personalizar cada mensagem baseado no histórico completo\n✅ Identificar padrões de interesse e objeção\n✅ Determinar o timing ideal para cada ação de vendas\n✅ Qualificar leads com máxima precisão\n✅ Transferir leads com contexto completo para Lucca\n✅ Oferecer experiência premium de consultoria personalizada\n\n- VOCÊ É A DIFERENÇA entre atendimento genérico e consultoria premium personalizada.\n- CADA CONSOLIDAÇÃO MAL FEITA = OPORTUNIDADE DE VENDA PERDIDA\n- CADA DOSSIÊ BEM ESTRUTURADO = LEAD QUALIFICADO COM MÁXIMA EFETIVIDADE\n- A memória híbrida que você gerencia É O CORAÇÃO de todo o sistema de vendas automatizado da Casa do Canal."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        840,
+        380
+      ],
+      "id": "1c01aae7-6752-4bb7-bd16-89ae266ec74d",
+      "name": "AI Agent - Context Manager"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "cdc_conversation_interactions",
+        "limit": 5,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "phone_canon",
+              "condition": "eq",
+              "keyValue": "={{ $('When Executed by Another Workflow').first().json.phone_canon }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        40,
+        380
+      ],
+      "id": "a59b8b7e-fe21-4136-9241-465ef6aa0152",
+      "name": "getRecentInteractions",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "EH5tBngtkDzJm9Cg",
+          "name": "Supabase | Casa do Canal"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Formatar últimas 5 interações para o user prompt\nconst interactions = $('getRecentInteractions').all();\n\nif (interactions.length === 0) {\n  return [{ json: { formatted_interactions: 'Nenhuma interação anterior registrada.' } }];\n}\n\nconst formatLabels = [\n  'Interação mais recente:',\n  '2ª interação mais recente:',\n  '3ª interação mais recente:', \n  '4ª interação mais recente:',\n  '5ª interação mais recente:'\n];\n\n// Ordenar por created_at DESC (mais recente primeiro)\nconst sortedInteractions = interactions.sort((a, b) => \n  new Date(b.json.created_at) - new Date(a.json.created_at)\n);\n\nlet formatted = '';\n\nsortedInteractions.forEach((interaction, index) => {\n  const data = interaction.json;\n  \n  formatted += `# ${formatLabels[index]}\\n`;\n  formatted += `Mensagem do agente: ${data.agent_message}\\n`;\n  formatted += `Timestamp: ${data.agent_timestamp_formatted}\\n`;\n  formatted += `Enviado por: ${data.agent_name}\\n\\n`;\n  \n  if (data.user_message && data.user_message.trim() !== '') {\n    formatted += `Resposta do usuário: ${data.user_message}\\n`;\n    formatted += `Timestamp: ${data.user_timestamp_formatted}\\n\\n`;\n  } else {\n    formatted += `Resposta do usuário: [AGUARDANDO RESPOSTA]\\n`;\n    formatted += `Timestamp: [PENDENTE]\\n\\n`;\n  }\n});\n\nreturn [{ json: { formatted_interactions: formatted.trim() } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        280,
+        380
+      ],
+      "id": "6c4db5b5-52de-477d-b6a2-36d48643fed2",
+      "name": "formatInteractions"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "58ec9b54-d62a-4cd2-aacd-3ebbe2573b99",
+              "name": "dossie_atual",
+              "value": "={{ $('Redis').first().json.dossie || 'Dossiê em construção - novo lead' }}",
+              "type": "string"
+            },
+            {
+              "id": "f46f1357-44f3-44fd-a286-32cdfc93bc21",
+              "name": "recent_interactions",
+              "value": "={{ $('formatInteractions').first().json.formatted_interactions }}",
+              "type": "string"
+            },
+            {
+              "id": "6458c3d6-e880-4201-aa17-76737484e4d8",
+              "name": "phone_canon",
+              "value": "={{ $('When Executed by Another Workflow').first().json.phone_canon }}",
+              "type": "string"
+            },
+            {
+              "id": "d4669eb7-5682-4f05-98d0-c41d5a2e5639",
+              "name": "nova_informacao",
+              "value": "={{ $('When Executed by Another Workflow').first().json.nova_informacao }}",
+              "type": "string"
+            },
+            {
+              "id": "766be10a-bbbd-45db-a408-50ba5193f644",
+              "name": "agent_name",
+              "value": "={{ $('When Executed by Another Workflow').first().json.agent_name }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        540,
+        380
+      ],
+      "id": "e2b1fbe0-cae6-474c-b20d-dcae06086eaa",
+      "name": "setDataForAgent",
+      "executeOnce": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "getLeadData",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis": {
+      "main": [
+        [
+          {
+            "node": "getRecentInteractions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent - Context Manager",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis1": {
+      "main": [
+        [
+          {
+            "node": "Redis2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis2": {
+      "main": [
+        [
+          {
+            "node": "setReturn",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "getLeadData": {
+      "main": [
+        [
+          {
+            "node": "Redis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent - Context Manager": {
+      "main": [
+        [
+          {
+            "node": "Redis1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "getRecentInteractions": {
+      "main": [
+        [
+          {
+            "node": "formatInteractions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "formatInteractions": {
+      "main": [
+        [
+          {
+            "node": "setDataForAgent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "setDataForAgent": {
+      "main": [
+        [
+          {
+            "node": "AI Agent - Context Manager",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1a969c41-aa6f-486b-a91a-d7431ef3d1f8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "35a1a031c5e8e1ff0c9e8fa545d3b65aa09dcbc4ad66d061f8f33d9e2e8f3a1b"
+  },
+  "id": "OlKmMlbqIb6KndqG",
+  "tags": []
+}

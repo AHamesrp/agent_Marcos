@@ -1,0 +1,490 @@
+{
+  "name": "CDC | Valores e Disponibilidade Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "bc37b42f-cf4a-48b4-be29-38c0d01e8ed1",
+              "name": "consulta_original",
+              "value": "={{ $json.consulta_cliente }}",
+              "type": "string"
+            },
+            {
+              "id": "e96943ed-56de-456d-bfdc-6553a81b99d6",
+              "name": "phone_canon",
+              "value": "={{ $json.phone_canon }}",
+              "type": "string"
+            },
+            {
+              "id": "ff2724bb-7bb1-425d-819f-22d1e9c706af",
+              "name": "timestamp_consulta",
+              "value": "={{ $now }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -280,
+        -180
+      ],
+      "id": "768a00a5-7136-4846-98e0-6df5ccbbc1b8",
+      "name": "setConsultaData"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "options": {
+          "responseFormat": "text",
+          "temperature": 0.1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -100,
+        60
+      ],
+      "id": "30a2a2b5-7abd-442b-9b58-068856856716",
+      "name": "OpenAI Chat Model - Query Generator",
+      "credentials": {
+        "openAiApi": {
+          "id": "XocFwX87IjlVYmUq",
+          "name": "OpenAI | LW"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Você é o especialista em traduzir consultas de hospedagem em filtros SQL precisos para a Casa do Canal.\n\n# CONSULTA RECEBIDA:\n{{ $json.consulta_original }}\n\n# SUA MISSÃO:\nTraduzir esta consulta em filtros SQL específicos para a tabela b_periodos_casa_canal.\n\n# TIPOS DE CONSULTA POSSÍVEIS:\n1. **Temporada**: \"alta temporada\", \"baixa temporada\" → tipo_periodo\n2. **Mês específico**: \"janeiro\", \"outubro\" → data_inicio/data_fim\n3. **Feriado**: \"carnaval\", \"natal\", \"reveillon\" → nome_periodo ILIKE\n4. **Período específico**: \"10 a 12 de outubro\" → datas exatas\n5. **Consulta geral**: \"valores gerais\", \"tudo\" → sem filtros específicos\n\n# ESTRUTURA DA TABELA:\n- data_inicio (DATE)\n- data_fim (DATE) \n- ano (INTEGER)\n- tipo_periodo (TEXT): 'alta_temporada', 'baixa_temporada', 'feriado'\n- nome_periodo (TEXT): 'Carnaval 2026', 'Natal 2025', etc.\n- disponivel (BOOLEAN)\n- prioridade (INTEGER): 1=feriado, 2=alta_temporada, 3=baixa_temporada\n\n# FORMATO DE RESPOSTA (JSON):\n```json\n{\n  \"tipo_consulta\": \"alta_temporada|baixa_temporada|mes_especifico|feriado|periodo_especifico|geral\",\n  \"filtros\": {\n    \"tipo_periodo\": \"alta_temporada\",\n    \"ano\": 2025,\n    \"data_inicio_lte\": \"2025-10-31\",\n    \"data_fim_gte\": \"2025-10-01\",\n    \"nome_periodo_ilike\": \"%carnaval%\"\n  },\n  \"observacoes\": \"Período específico ou considerações especiais\"\n}\n```\n\n# REGRAS IMPORTANTES:\n- Ano padrão: 2025 (se não especificado)\n- Para meses: usar data_inicio_lte e data_fim_gte para capturar sobreposições\n- Para feriados: usar nome_periodo ILIKE\n- Para temporadas: usar tipo_periodo exato\n\nRESPONDA APENAS O JSON:",
+        "options": {
+          "systemMessage": "=Você é um especialista em SQL e análise de dados de hospedagem. Seja preciso e objetivo.\n\n# REGRA CRÍTICA SOBRE ANOS:\n- Para consultas de TEMPORADA (\"alta temporada\", \"baixa temporada\"): SEMPRE buscar 2025 E 2026\n- Para consultas específicas de mês/feriado: usar ano atual/próximo conforme contexto  \n- Para consultas gerais: buscar ambos os anos (2025 e 2026)\n\nEsta regra é fundamental porque os dados de temporada estão distribuídos entre os dois anos.\n\n\n\n# Exemplos de input e output\n\n## Exemplo 1:\nInput: \"Hóspede quer saber valor para alta temporada\"\n\nOutput:\njson{\n  \"tipo_consulta\": \"alta_temporada\",\n  \"filtros\": {\n    \"tipo_periodo\": \"alta_temporada\",\n    \"ano\": 2025\n  },\n  \"observacoes\": \"Consulta para todos os períodos de alta temporada\"\n}\n\n\n\n## Exemplo 2:\nInput: \"Hóspede quer saber valor para outubro\"\n\nOutput:\njson{\n  \"tipo_consulta\": \"mes_especifico\",\n  \"filtros\": {\n    \"ano\": 2025,\n    \"data_inicio_lte\": \"2025-10-31\",\n    \"data_fim_gte\": \"2025-10-01\"\n  },\n  \"observacoes\": \"Mês específico - outubro 2025\"\n}\n\n\n\n## Exemplo 3:\nInput: \"Hóspede quer saber valor para carnaval\"\n\nOutput:\njson{\n  \"tipo_consulta\": \"feriado\",\n  \"filtros\": {\n    \"nome_periodo_ilike\": \"%carnaval%\",\n    \"ano\": 2025\n  },\n  \"observacoes\": \"Feriado específico - Carnaval\"\n}\n\n\n\n## Exemplo 4:\nInput: \"Hóspede quer saber valor do dia 10 ao dia 13 de outubro\"\nOutput:\njson{\n  \"tipo_consulta\": \"periodo_especifico\",\n  \"filtros\": {\n    \"ano\": 2025,\n    \"data_inicio_lte\": \"2025-10-13\",\n    \"data_fim_gte\": \"2025-10-10\"\n  },\n  \"observacoes\": \"Período específico de 4 dias em outubro\"\n}\n\n\n\n## Exemplo 5:\nInput: \"Hóspede quer saber valor para baixa temporada\"\n\nOutput:\njson{\n  \"tipo_consulta\": \"baixa_temporada\",\n  \"filtros\": {\n    \"tipo_periodo\": \"baixa_temporada\",\n    \"ano\": 2025\n  },\n  \"observacoes\": \"Todos os períodos de baixa temporada\"\n}\n\n\n\n## Exemplo 6:\nInput: \"Hóspede quer saber valor para dezembro\"\n\nOutput:\njson{\n  \"tipo_consulta\": \"mes_especifico\",\n  \"filtros\": {\n    \"ano\": 2025,\n    \"data_inicio_lte\": \"2025-12-31\",\n    \"data_fim_gte\": \"2025-12-01\"\n  },\n  \"observacoes\": \"Mês específico - dezembro 2025\"\n}\n\n\n\n\n## Exemplo 7:\nInput: \"Hóspede quer saber valores gerais da casa\"\n\nOutput:\njson{\n  \"tipo_consulta\": \"geral\",\n  \"filtros\": {\n    \"ano\": 2025\n  },\n  \"observacoes\": \"Consulta geral de todos os valores disponíveis\"\n}\n\n\n\n## Exemplo 8:\nInput: \"Hóspede quer saber valor para reveillon\"\n\nOutput:\njson{\n  \"tipo_consulta\": \"feriado\",\n  \"filtros\": {\n    \"nome_periodo_ilike\": \"%réveillon%\",\n    \"ano\": 2025\n  },\n  \"observacoes\": \"Feriado específico - Réveillon/Ano Novo\"\n}\n\n",
+          "returnIntermediateSteps": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        -60,
+        -180
+      ],
+      "id": "d48b1496-d8db-4863-ab75-993be3b8be7d",
+      "name": "AI Agent - Query Generator"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse da resposta do LLM Query Generator\nconst llmResponse = $('AI Agent - Query Generator').item.json.output;\nconst consultaOriginal = $('setConsultaData').item.json.consulta_original;\n\ntry {\n  // Extrair JSON da resposta\n  const jsonMatch = llmResponse.match(/```json\\s*([\\s\\S]*?)\\s*```/) || \n                   llmResponse.match(/\\{[\\s\\S]*\\}/);\n  \n  if (!jsonMatch) {\n    throw new Error(\"JSON não encontrado na resposta\");\n  }\n  \n  const queryData = JSON.parse(jsonMatch[1] || jsonMatch[0]);\n  \n  // Construir filtros para Supabase\n  let supabaseFilters = [];\n  \n  if (queryData.filtros.tipo_periodo) {\n    supabaseFilters.push({\n      keyName: \"tipo_periodo\",\n      condition: \"eq\",\n      keyValue: queryData.filtros.tipo_periodo\n    });\n  }\n  \n  if (queryData.filtros.ano) {\n    supabaseFilters.push({\n      keyName: \"ano\",\n      condition: \"eq\", \n      keyValue: queryData.filtros.ano.toString()\n    });\n  }\n  \n  if (queryData.filtros.data_inicio_lte) {\n    supabaseFilters.push({\n      keyName: \"data_inicio\",\n      condition: \"lte\",\n      keyValue: queryData.filtros.data_inicio_lte\n    });\n  }\n  \n  if (queryData.filtros.data_fim_gte) {\n    supabaseFilters.push({\n      keyName: \"data_fim\",\n      condition: \"gte\",\n      keyValue: queryData.filtros.data_fim_gte\n    });\n  }\n  \n  if (queryData.filtros.nome_periodo_ilike) {\n    supabaseFilters.push({\n      keyName: \"nome_periodo\",\n      condition: \"ilike\",\n      keyValue: queryData.filtros.nome_periodo_ilike\n    });\n  }\n  \n  return [{\n    json: {\n      tipo_consulta: queryData.tipo_consulta,\n      supabase_filters: supabaseFilters,\n      consulta_original: consultaOriginal,\n      query_data: queryData,\n      parse_sucesso: true\n    }\n  }];\n  \n} catch (error) {\n  console.log(\"Erro no parse:\", error.message);\n  \n  // Fallback: filtros básicos baseados em palavras-chave\n  const consulta = consultaOriginal.toLowerCase();\n  let fallbackFilters = [{\n    keyName: \"ano\",\n    condition: \"eq\",\n    keyValue: \"2025\"\n  }];\n  \n  if (consulta.includes(\"alta\")) {\n    fallbackFilters.push({\n      keyName: \"tipo_periodo\",\n      condition: \"eq\",\n      keyValue: \"alta_temporada\"\n    });\n  } else if (consulta.includes(\"baixa\")) {\n    fallbackFilters.push({\n      keyName: \"tipo_periodo\",\n      condition: \"eq\", \n      keyValue: \"baixa_temporada\"\n    });\n  }\n  \n  return [{\n    json: {\n      tipo_consulta: \"geral\",\n      supabase_filters: fallbackFilters,\n      consulta_original: consultaOriginal,\n      parse_sucesso: false,\n      erro: error.message\n    }\n  }];\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        420,
+        -180
+      ],
+      "id": "cf7fb0e0-26ed-4da0-9b92-969875eec4de",
+      "name": "parseQueryFilters"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c77d829e-6d28-4eb9-af5b-a59fae3aa45c",
+              "leftValue": "={{ $input.all().length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1080,
+        -180
+      ],
+      "id": "8424aceb-5001-44b3-bbe0-0f7cd0e90ced",
+      "name": "verificaResultados"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Dados vêm direto do HTTP Request agora\nconst periodos = $input.all(); // Array de períodos da API Supabase\nconst queryContext = $('buildSupabaseQuery').item.json;\n\nif (periodos.length === 0) {\n  return [{\n    json: {\n      sem_resultados: true,\n      consulta_original: queryContext.consulta_original\n    }\n  }];\n}\n\n// Processar os períodos (cada item já é um período do Supabase)\nconst periodosDisponiveis = periodos.filter(p => p.json.disponivel === true);\nconst periodosIndisponiveis = periodos.filter(p => p.json.disponivel === false);\n\n// Calcular estatísticas\nconst valores = periodosDisponiveis.map(p => p.json.valor_noite);\nconst valorMin = Math.min(...valores);\nconst valorMax = Math.max(...valores);\n\nconst minimos = periodosDisponiveis.map(p => p.json.minimo_noites);\nconst minimoMin = Math.min(...minimos);\nconst minimoMax = Math.max(...minimos);\n\n// Agrupar por tipo_periodo\nconst grupos = {};\nperiodosDisponiveis.forEach(item => {\n  const periodo = item.json;\n  const tipo = periodo.tipo_periodo;\n  \n  if (!grupos[tipo]) {\n    grupos[tipo] = {\n      tipo_periodo: tipo,\n      periodos: [],\n      valor_min: Infinity,\n      valor_max: 0,\n      minimo_noites_min: Infinity,\n      minimo_noites_max: 0\n    };\n  }\n  \n  grupos[tipo].periodos.push(periodo);\n  grupos[tipo].valor_min = Math.min(grupos[tipo].valor_min, periodo.valor_noite);\n  grupos[tipo].valor_max = Math.max(grupos[tipo].valor_max, periodo.valor_noite);\n  grupos[tipo].minimo_noites_min = Math.min(grupos[tipo].minimo_noites_min, periodo.minimo_noites);\n  grupos[tipo].minimo_noites_max = Math.max(grupos[tipo].minimo_noites_max, periodo.minimo_noites);\n});\n\n// Formatar para análise da LLM\nlet dadosFormatados = `# CONSULTA ORIGINAL\\n${queryContext.consulta_original}\\n\\n`;\ndadosFormatados += `# ESTATÍSTICAS GERAIS\\n`;\ndadosFormatados += `- Total de períodos encontrados: ${periodos.length}\\n`;\ndadosFormatados += `- Períodos disponíveis: ${periodosDisponiveis.length}\\n`;\ndadosFormatados += `- Períodos indisponíveis: ${periodosIndisponiveis.length}\\n`;\n\nif (periodosDisponiveis.length > 0) {\n  dadosFormatados += `- Faixa de valores: R$${valorMin.toLocaleString('pt-BR')} - R$${valorMax.toLocaleString('pt-BR')}\\n`;\n  dadosFormatados += `- Mínimo de noites: ${minimoMin} - ${minimoMax}\\n\\n`;\n}\n\n// Detalhar períodos disponíveis\ndadosFormatados += `# PERÍODOS DISPONÍVEIS\\n`;\nperiodosDisponiveis.forEach(item => {\n  const p = item.json;\n  dadosFormatados += `## ${p.nome_periodo}\\n`;\n  dadosFormatados += `- Período: ${p.data_inicio} a ${p.data_fim}\\n`;\n  dadosFormatados += `- Tipo: ${p.tipo_periodo}\\n`;\n  dadosFormatados += `- Valor/noite: R$${p.valor_noite.toLocaleString('pt-BR')}\\n`;\n  dadosFormatados += `- Mínimo noites: ${p.minimo_noites}\\n`;\n  dadosFormatados += `- Prioridade: ${p.prioridade}\\n\\n`;\n});\n\n// Listar indisponíveis se houver\nif (periodosIndisponiveis.length > 0) {\n  dadosFormatados += `# PERÍODOS INDISPONÍVEIS\\n`;\n  periodosIndisponiveis.forEach(item => {\n    const p = item.json;\n    dadosFormatados += `- ${p.data_inicio} a ${p.data_fim}: ${p.motivo_indisponivel}\\n`;\n  });\n}\n\nreturn [{\n  json: {\n    dados_formatados: dadosFormatados,\n    periodos_disponiveis: periodosDisponiveis.length,\n    periodos_indisponiveis: periodosIndisponiveis.length,\n    valor_min: valorMin,\n    valor_max: valorMax,\n    minimo_min: minimoMin,\n    minimo_max: minimoMax,\n    grupos_por_tipo: Object.values(grupos),\n    consulta_original: queryContext.consulta_original\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1320,
+        -340
+      ],
+      "id": "663f0642-26b6-4326-adac-2779a284c515",
+      "name": "formatDataForAnalysis"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "options": {
+          "responseFormat": "text",
+          "temperature": 0.2
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1540,
+        -160
+      ],
+      "id": "a841d022-e252-40ea-9e08-f234ffc973d6",
+      "name": "OpenAI Chat Model - Formatador",
+      "credentials": {
+        "openAiApi": {
+          "id": "XocFwX87IjlVYmUq",
+          "name": "OpenAI | LW"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Você é o especialista técnico em valores e disponibilidade da Casa do Canal.\nAnalise os dados e forneça informações TÉCNICAS COMPLETAS para o agente Marcos processar.\n\n# DADOS PARA ANÁLISE:\n{{ $json.dados_formatados }}\n\n# DIRETRIZES TÉCNICAS:\n\n## ⚠️ MÍNIMO DE NOITES - REGRA CRÍTICA:\n- SEMPRE mencione o mínimo de noites para cada período\n- Se consulta específica for menor que mínimo, EXPLICAR limitação técnica\n- Exemplo: \"Período solicitado: 2 noites. Mínimo técnico: 3 noites para outubro.\"\n\n## 💰 VALORES E FLUTUAÇÃO:\n- Formato: R$3.250/noite \n- Se há flutuação no período, EXPLICAR motivo técnico\n- Calcular totais para períodos específicos quando aplicável\n\n## 📅 DISPONIBILIDADE:\n- Status claro: ✅ Disponível / ❌ Indisponível / ⚠️ Parcial\n- Destacar períodos indisponíveis com motivo\n- Agrupar períodos similares quando fizer sentido\n\n## 🎯 ANÁLISE TÉCNICA:\n- Confirmar tipo de consulta processada\n- Ser específico com datas: \"10 a 13 de outubro\" não \"outubro\"\n- Fornecer resumo técnico para facilitar processamento do Marcos\n\n# FORMATO DE RESPOSTA TÉCNICA:\n📊 [TIPO DE CONSULTA PROCESSADA]\n🗓️ PERÍODOS ENCONTRADOS:\n\n[Período específico]: R$X.XXX/noite (mín. X noites) [Status]\n\n⚠️ RESUMO TÉCNICO:\n\nTotal períodos: X disponíveis, X indisponíveis\nFaixa valores: RX.XXX−RX.XXX - R\nX.XXX−RX.XXX/noite\n\nMínimo noites: X a X noites\n[Observações técnicas importantes]\n\n💰 ANÁLISE DE VALORES: [Padrões identificados]\n\n# CASOS TÉCNICOS ESPECIAIS:\n\n**Consulta específica menor que mínimo:**\n❌ LIMITAÇÃO TÉCNICA:\n\nPeríodo solicitado: X noites\nMínimo obrigatório: Y noites para este período\nStatus: Não atende requisitos mínimos\n\n\n**Períodos indisponíveis:**\n❌ INDISPONIBILIDADE:\n\nPeríodo: [datas]\nMotivo: [reservado/bloqueado]\n\n\n**Consulta ampla:**\nAgrupar por tipo_periodo e fornecer análise estruturada.\n\nPROCESSE OS DADOS E FORNEÇA ANÁLISE TÉCNICA COMPLETA:\n🎯 RESULTADO ESPERADO:\n❌ Antes:\n\n\"💡 SUGESTÃO: Caso tenha interesse em feriados especiais... posso ajudar a verificar disponibilidade\n❓ Que período específico mais te interessa?\"\n\n✅ Depois:\n\n\"⚠️ RESUMO TÉCNICO:\n\nTotal períodos: 10 disponíveis, 1 indisponível\nFaixa valores: R$3.800 - R$9.500/noite\nMínimo noites: 4 a 7 noites\nObservação: Réveillon exige 7 noites mínimas\"",
+        "options": {
+          "systemMessage": "=Você é o especialista técnico em valores e disponibilidade da Casa do Canal.\n\n# SUA FUNÇÃO:\nProcessar consultas de valores/disponibilidade e fornecer dados TÉCNICOS e ESTRUTURADOS para o agente Marcos repassar ao lead.\n\n# IMPORTANTE - VOCÊ RESPONDE PARA O MARCOS, NÃO PARA O CLIENTE:\n- Seja TÉCNICO e INFORMATIVO\n- Forneça análise COMPLETA e OBJETIVA dos dados\n- NÃO faça perguntas ao \"cliente\" \n- NÃO use linguagem de atendimento direto (\"você gostaria\", \"posso ajudar\")\n- OBJETIVO: Equipar o Marcos com todas as informações necessárias\n\n# DIRETRIZES TÉCNICAS:\n\n## ⚠️ MÍNIMO DE NOITES:\n- SEMPRE mencione o mínimo para cada período\n- Se há variação, EXPLIQUE claramente os motivos\n\n## 💰 VALORES:\n- Formato padrão: R$3.250/noite\n- Se há flutuação, EXPLIQUE por quê\n- Calcule totais quando relevante para comparação\n\n## 📅 DISPONIBILIDADE:\n- ✅ Disponível / ❌ Indisponível / ⚠️ Parcialmente reservado\n- Agrupe períodos similares quando fizer sentido\n- Seja específico com datas\n\n## 🎯 ANÁLISE TÉCNICA:\n- Confirme o tipo de consulta processada\n- Forneça resumo técnico para facilitar decisão\n- Identifique padrões importantes (valores fixos, feriados, etc.)\n\n# NUNCA FAÇA:\n- Sugestões contraditórias aos dados apresentados\n- Perguntas diretas (\"Que período te interessa?\")\n- Ofertas redundantes (\"posso verificar\" quando já verificou)\n- Linguagem de vendas ou atendimento direto\n\n# SEMPRE INCLUA:\n- Análise completa dos dados encontrados\n- Resumo técnico estruturado\n- Informações-chave para o Marcos processar\n\n\n# EXEMPLOS DE PROCESSAMENTO TÉCNICO:\n\n## Exemplo 1:\nInput: Dados de alta temporada (janeiro 2026, fevereiro 2026 parcial, março 2026, dezembro 2025 parcial)\n\nOutput:\n📊 CONSULTA ALTA TEMPORADA 2025-2026 PROCESSADA\n\n🗓️ PERÍODOS ENCONTRADOS:\n- Janeiro 2026: R$6.000/noite (mín. 5 noites) ✅\n- Fevereiro 2026 (1-12 e 19-28): R$5.500/noite (mín. 5 noites) ✅  \n- Março 2026: R$4.000/noite (mín. 4 noites) ✅\n- Dezembro 2025 (1-9 e 16-19): R$3.800/noite (mín. 5 noites) ✅\n- Dezembro 2025 (10-15): ❌ Período reservado\n- Carnaval 2026 (13-18 fev): R$7.000/noite (mín. 5 noites) ✅\n- Natal 2025 (20-26 dez): R$5.000/noite (mín. 5 noites) ✅\n- Réveillon 2025 (27-31 dez): R$9.500/noite (mín. 7 noites) ✅\n\n⚠️ RESUMO TÉCNICO:\n- Total períodos: 7 disponíveis, 1 indisponível\n- Faixa valores: R$3.800 - R$9.500/noite\n- Mínimo noites: 4 a 7 noites (Réveillon exige 7)\n\n\n## Exemplo 2:\nInput: Dados de outubro (3 períodos encontrados)\n\nOutput:\n📊 CONSULTA OUTUBRO 2025 PROCESSADA\n\n🗓️ PERÍODOS ENCONTRADOS:\n- 1º a 11 de outubro: R$3.250/noite (mín. 3 noites) ✅\n- 12 a 13 de outubro: R$3.250/noite (feriado Aparecida, mín. 3 noites) ✅\n- 14 a 31 de outubro: R$3.250/noite (mín. 3 noites) ✅\n\n⚠️ RESUMO TÉCNICO:\n- Total períodos: 3 disponíveis, 0 indisponíveis\n- Valor fixo: R$3.250/noite todo o mês\n- Mínimo noites: 3 noites uniformemente\n\n\n## Exemplo 3:\nInput: Dados do Carnaval 2026\n\nOutput:\n📊 CONSULTA CARNAVAL 2026 PROCESSADA\n\n🗓️ PERÍODO ENCONTRADO:\n- 13 a 18 de fevereiro: R$7.000/noite (mín. 5 noites) ✅\n\n⚠️ RESUMO TÉCNICO:\n- Período premium específico para feriado\n- Valor fixo: R$7.000/noite\n- Mínimo obrigatório: 5 noites\n\n\n## Exemplo 4:\nInput: Consulta específica 10-13 outubro (4 noites)\n\nOutput:\n📊 CONSULTA PERÍODO ESPECÍFICO 10-13 OUTUBRO PROCESSADA\n\n🗓️ DETALHAMENTO TÉCNICO:\n- 10-11 outubro: R$3.250/noite (período geral)\n- 12-13 outubro: R$3.250/noite (feriado Aparecida)\n- Valor total calculado: R$13.000 (4 noites)\n\n✅ ANÁLISE TÉCNICA:\n- Status: Totalmente disponível\n- Conformidade: Atende mínimo de 3 noites para outubro\n- Observação: Inclui feriado Nossa Senhora Aparecida\n\n\n## Exemplo 5:\nInput: Dados de baixa temporada (julho, agosto, setembro, outubro, novembro)\n\nOutput:\n📊 CONSULTA BAIXA TEMPORADA 2025 PROCESSADA\n\n🗓️ PERÍODOS ENCONTRADOS:\n- Julho: R$3.000/noite (mín. 3 noites) ⚠️ Parcialmente reservado\n- Agosto: R$3.000/noite (mín. 3 noites) ⚠️ Parcialmente reservado  \n- Setembro: R$3.000/noite (mín. 3 noites) ⚠️ Parcialmente reservado\n- Outubro: R$3.250/noite (mín. 3 noites) ✅ Totalmente disponível\n- Novembro: R$3.500/noite (mín. 4 noites) ⚠️ Parcialmente reservado\n\n⚠️ RESUMO TÉCNICO:\n- Faixa valores: R$3.000 - R$3.500/noite\n- Mínimo noites: 3-4 noites conforme mês\n- Melhor disponibilidade: Outubro (100% livre)\n- Melhor preço: Julho-setembro (R$3.000/noite)\n\n\n## Exemplo 6:\nInput: Dados de dezembro (mix disponível/indisponível + feriados)\n\nOutput:\n📊 CONSULTA DEZEMBRO 2025 PROCESSADA\n\n🗓️ PERÍODOS ENCONTRADOS:\n- 1º a 9 dezembro: R$3.800/noite (alta temp., mín. 5 noites) ✅\n- 10 a 15 dezembro: ❌ Período reservado\n- 16 a 19 dezembro: R$3.800/noite (alta temp., mín. 5 noites) ✅\n- 20 a 26 dezembro: R$5.000/noite (Natal, mín. 5 noites) ✅\n- 27 a 31 dezembro: R$9.500/noite (Réveillon, mín. 7 noites) ✅\n\n⚠️ RESUMO TÉCNICO:\n- Total períodos: 4 disponíveis, 1 indisponível\n- Faixa valores: R$3.800 - R$9.500/noite\n- Composição: Alta temporada + feriados especiais\n- Mínimos variados: 5 noites (geral), 7 noites (Réveillon)\n\n\n## Exemplo 7:\nInput: Consulta período 5-6 setembro (1 noite)\n\nOutput:\n📊 CONSULTA PERÍODO 5-6 SETEMBRO PROCESSADA\n\n❌ LIMITAÇÃO TÉCNICA IDENTIFICADA:\n- Período solicitado: 1 noite (5-6 setembro)\n- Mínimo obrigatório: 3 noites para setembro\n- Status adicional: ❌ Período 05-08 setembro já reservado\n\n💡 ALTERNATIVAS TÉCNICAS DISPONÍVEIS:\n- 01 a 04 setembro: R$3.000/noite (3 noites = R$9.000)\n- 09 a 30 setembro: R$3.000/noite (3+ noites = R$9.000+)\n\n\n## Exemplo 8:\nInput: Consulta geral (todos os dados da tabela)\n\nOutput:\n📊 CONSULTA GERAL VALORES 2025-2026 PROCESSADA\n\n🗓️ ANÁLISE POR CATEGORIA:\n💎 FERIADOS ESPECIAIS: R$3.250 - R$9.500/noite (mín. 3-7 noites)\n🏖️ ALTA TEMPORADA: R$3.800 - R$6.000/noite (mín. 4-5 noites)  \n🌿 BAIXA TEMPORADA: R$3.000 - R$3.500/noite (mín. 3-4 noites)\n\n⚠️ RESUMO TÉCNICO GERAL:\n- Faixa completa: R$3.000 - R$9.500/noite\n- Mínimos de estadia: 3-7 noites conforme período\n- Valor mais econômico: Julho-setembro (R$3.000/noite)\n- Valor premium: Réveillon (R$9.500/noite, mín. 7 noites)\n- Feriado de destaque: Carnaval (R$7.000/noite)\n\n# DIRETRIZES TÉCNICAS BASEADAS NOS EXEMPLOS:\n- Use formato \"PROCESSADA\" no título para confirmar análise completa\n- Sempre inclua \"RESUMO TÉCNICO\" com dados estruturados\n- Para limitações, use \"LIMITAÇÃO TÉCNICA IDENTIFICADA\"\n- Para alternativas, use \"ALTERNATIVAS TÉCNICAS DISPONÍVEIS\"\n- Mantenha linguagem técnica e informativa, nunca comercial",
+          "returnIntermediateSteps": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        1560,
+        -340
+      ],
+      "id": "a6463e28-9bbc-4aa5-bcb7-4646219bc2a9",
+      "name": "AI Agent - Valores Especialista"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "58ec9b54-d62a-4cd2-aacd-3ebbe2573b99",
+              "name": "resposta_formatada",
+              "value": "={{ $('AI Agent - Valores Especialista').item.json.output }}",
+              "type": "string"
+            },
+            {
+              "id": "79425af3-e0e2-4174-ad9f-f7ba50a74c62",
+              "name": "consulta_original",
+              "value": "={{ $('formatDataForAnalysis').item.json.consulta_original }}",
+              "type": "string"
+            },
+            {
+              "id": "354638b1-308a-4c0f-bdf5-8ae94ebdf091",
+              "name": "periodos_encontrados",
+              "value": "={{ $('formatDataForAnalysis').item.json.periodos_disponiveis }}",
+              "type": "number"
+            },
+            {
+              "id": "6458c3d6-e880-4201-aa17-76737484e4d8",
+              "name": "timestamp_resposta",
+              "value": "={{ $now }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2040,
+        -340
+      ],
+      "id": "35da4983-32d5-4ef7-bac6-dc295ecbc749",
+      "name": "prepareResponse"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "58ec9b54-d62a-4cd2-aacd-3ebbe2573b99",
+              "name": "resposta_formatada",
+              "value": "Não encontrei disponibilidade para o período consultado. \n\nPoderia me dizer uma data específica ou período alternativo para verificar nossa disponibilidade? 🗓️",
+              "type": "string"
+            },
+            {
+              "id": "79425af3-e0e2-4174-ad9f-f7ba50a74c62",
+              "name": "consulta_original",
+              "value": "={{ $('buildSupabaseQuery').item.json.consulta_original }}",
+              "type": "string"
+            },
+            {
+              "id": "354638b1-308a-4c0f-bdf5-8ae94ebdf091",
+              "name": "periodos_encontrados",
+              "value": 0,
+              "type": "number"
+            },
+            {
+              "id": "6458c3d6-e880-4201-aa17-76737484e4d8",
+              "name": "timestamp_resposta",
+              "value": "={{ $now }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1400,
+        80
+      ],
+      "id": "f0aedfd6-ea3c-40bd-bc43-18c14e6bdfdb",
+      "name": "noResultsResponse"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "consulta_cliente"
+            },
+            {
+              "name": "phone_canon"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -540,
+        -180
+      ],
+      "id": "66a9471a-fe7e-42c7-89b0-d6fcad4f34bc",
+      "name": "ExecuteWorkflowTrigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "// const queryData = $('parseQueryFilters').item.json;\n// const filters = queryData.supabase_filters;\n\n// // Construir query string para Supabase REST API\n// let queryParams = [];\n\n// filters.forEach(filter => {\n//   // LÓGICA ESPECIAL: Para consultas de temporada, incluir feriados também\n//   if (filter.keyName === 'tipo_periodo') {\n//     if (filter.keyValue === 'alta_temporada') {\n//       queryParams.push(`tipo_periodo=in.(alta_temporada,feriado)`);\n//       return;\n//     } else if (filter.keyValue === 'baixa_temporada') {\n//       queryParams.push(`tipo_periodo=in.(baixa_temporada,feriado)`);\n//       return;\n//     }\n//   }\n  \n//   // Se é consulta de temporada e ano=2025, buscar também 2026\n//   if (filter.keyName === 'ano' && filter.keyValue === '2025' && \n//       (queryData.tipo_consulta === 'alta_temporada' || queryData.tipo_consulta === 'baixa_temporada')) {\n//     queryParams.push(`ano=in.(2025,2026)`);\n//     return;\n//   }\n  \n//   switch(filter.condition) {\n//     case 'eq':\n//       queryParams.push(`${filter.keyName}=eq.${filter.keyValue}`);\n//       break;\n//     case 'lte':\n//       queryParams.push(`${filter.keyName}=lte.${filter.keyValue}`);\n//       break;\n//     case 'gte':\n//       queryParams.push(`${filter.keyName}=gte.${filter.keyValue}`);\n//       break;\n//     case 'ilike':\n//       queryParams.push(`${filter.keyName}=ilike.${filter.keyValue}`);\n//       break;\n//   }\n// });\n\n// const queryString = queryParams.join('&');\n// const baseUrl = 'https://ywlvhsujqfqrpsoryryz.supabase.co';\n// const fullUrl = `${baseUrl}/rest/v1/b_periodos_casa_canal?${queryString}&order=prioridade.asc,data_inicio.asc`;\n\n// console.log('Query URL construída:', fullUrl);\n// console.log('Filtros aplicados:', filters);\n\n// return [{ \n//   json: { \n//     query_url: fullUrl, \n//     original_filters: filters,\n//     consulta_original: queryData.consulta_original \n//   } \n// }];\n\n// TESTE SIMPLES - substitua temporariamente o buildSupabaseQuery\n\n// VERSÃO CORRIGIDA do buildSupabaseQuery\n\nconst queryData = $('parseQueryFilters').item.json;\nconst filters = queryData.supabase_filters;\n\nconst baseUrl = 'https://ywlvhsujqfqrpsoryryz.supabase.co';\n\nconsole.log('=== DEBUG QUERY BUILDER ===');\nconsole.log('QueryData:', queryData);\nconsole.log('Filters:', filters);\n\n// Verificar se filters existe\nif (!filters || !Array.isArray(filters) || filters.length === 0) {\n  console.log('⚠️ Sem filtros, fazendo query geral');\n  const fallbackUrl = `${baseUrl}/rest/v1/b_periodos_casa_canal?select=*&order=prioridade.asc,data_inicio.asc&limit=20`;\n  return [{ \n    json: { \n      query_url: fallbackUrl,\n      consulta_original: queryData.consulta_original || 'Consulta geral'\n    } \n  }];\n}\n\n// Construir parâmetros de forma mais segura\nlet queryParams = [];\n\nfilters.forEach((filter, index) => {\n  try {\n    console.log(`Processando filter ${index}:`, filter);\n    \n    // Validar estrutura do filtro\n    if (!filter.keyName || !filter.condition || filter.keyValue === undefined) {\n      console.log(`⚠️ Filter ${index} inválido, pulando`);\n      return;\n    }\n    \n    const keyName = filter.keyName.trim();\n    const condition = filter.condition.trim();\n    let keyValue = filter.keyValue;\n    \n    // Tratar valores especiais\n    if (typeof keyValue === 'string') {\n      keyValue = keyValue.trim();\n    }\n    \n    // Lógica especial para temporadas\n    if (keyName === 'tipo_periodo') {\n      if (keyValue === 'alta_temporada') {\n        queryParams.push(`tipo_periodo=in.(alta_temporada,feriado)`);\n        return;\n      } else if (keyValue === 'baixa_temporada') {\n        queryParams.push(`tipo_periodo=in.(baixa_temporada,feriado)`);\n        return;\n      }\n    }\n    \n    // Lógica para anos múltiplos\n    if (keyName === 'ano' && keyValue === '2025' && \n        (queryData.tipo_consulta === 'alta_temporada' || queryData.tipo_consulta === 'baixa_temporada')) {\n      queryParams.push(`ano=in.(2025,2026)`);\n      return;\n    }\n    \n    // Construir parâmetro normal\n    switch(condition) {\n      case 'eq':\n        queryParams.push(`${keyName}=eq.${encodeURIComponent(keyValue)}`);\n        break;\n      case 'lte':\n        queryParams.push(`${keyName}=lte.${encodeURIComponent(keyValue)}`);\n        break;\n      case 'gte':\n        queryParams.push(`${keyName}=gte.${encodeURIComponent(keyValue)}`);\n        break;\n      case 'ilike':\n        queryParams.push(`${keyName}=ilike.${encodeURIComponent(keyValue)}`);\n        break;\n      default:\n        console.log(`⚠️ Condição desconhecida: ${condition}`);\n    }\n    \n  } catch (error) {\n    console.log(`❌ Erro no filter ${index}:`, error.message);\n  }\n});\n\n// Montar URL final\nconst select = 'select=*';\nconst order = 'order=prioridade.asc,data_inicio.asc';\nconst limit = 'limit=50';\n\nlet finalParams = [select, order, limit];\nif (queryParams.length > 0) {\n  finalParams = [select, ...queryParams, order, limit];\n}\n\nconst queryString = finalParams.join('&');\nconst fullUrl = `${baseUrl}/rest/v1/b_periodos_casa_canal?${queryString}`;\n\nconsole.log('=== RESULTADO ===');\nconsole.log('Query params:', queryParams);\nconsole.log('Final URL:', fullUrl);\nconsole.log('URL length:', fullUrl.length);\n\n// Verificar tamanho da URL\nif (fullUrl.length > 2000) {\n  console.log('❌ URL muito longa, usando query simplificada');\n  const simpleUrl = `${baseUrl}/rest/v1/b_periodos_casa_canal?select=*&ano=eq.2025&order=prioridade.asc&limit=20`;\n  return [{ \n    json: { \n      query_url: simpleUrl,\n      consulta_original: queryData.consulta_original,\n      fallback: true\n    } \n  }];\n}\n\nreturn [{ \n  json: { \n    query_url: fullUrl, \n    original_filters: filters,\n    consulta_original: queryData.consulta_original,\n    debug: {\n      queryParams: queryParams,\n      success: true\n    }\n  } \n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        -180
+      ],
+      "id": "ff763500-1775-4845-b4ad-31437f60c153",
+      "name": "buildSupabaseQuery"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.query_url }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3bHZoc3VqcWZxcnBzb3J5cnl6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU0MzU4NjUsImV4cCI6MjA2MTAxMTg2NX0.JE8Ku8PsH1xNAoYBGS1Hm5oCD3bwCQFa9eOEUMsPZUw"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3bHZoc3VqcWZxcnBzb3J5cnl6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU0MzU4NjUsImV4cCI6MjA2MTAxMTg2NX0.JE8Ku8PsH1xNAoYBGS1Hm5oCD3bwCQFa9eOEUMsPZUw"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        860,
+        -180
+      ],
+      "id": "79b3398a-37c7-42ba-85bc-b42abe3c22b3",
+      "name": "getPeriodosRelevantes"
+    }
+  ],
+  "pinData": {
+    "ExecuteWorkflowTrigger": [
+      {
+        "json": {
+          "consulta_cliente": "Lead perguntou sobre natal",
+          "phone_canon": null
+        }
+      }
+    ]
+  },
+  "connections": {
+    "setConsultaData": {
+      "main": [
+        [
+          {
+            "node": "AI Agent - Query Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model - Query Generator": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent - Query Generator",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent - Query Generator": {
+      "main": [
+        [
+          {
+            "node": "parseQueryFilters",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parseQueryFilters": {
+      "main": [
+        [
+          {
+            "node": "buildSupabaseQuery",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "verificaResultados": {
+      "main": [
+        [
+          {
+            "node": "formatDataForAnalysis",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "noResultsResponse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "formatDataForAnalysis": {
+      "main": [
+        [
+          {
+            "node": "AI Agent - Valores Especialista",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model - Formatador": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent - Valores Especialista",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent - Valores Especialista": {
+      "main": [
+        [
+          {
+            "node": "prepareResponse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ExecuteWorkflowTrigger": {
+      "main": [
+        [
+          {
+            "node": "setConsultaData",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "buildSupabaseQuery": {
+      "main": [
+        [
+          {
+            "node": "getPeriodosRelevantes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "getPeriodosRelevantes": {
+      "main": [
+        [
+          {
+            "node": "verificaResultados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ae1ae132-7e3a-4a29-9d09-034c937c6048",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "35a1a031c5e8e1ff0c9e8fa545d3b65aa09dcbc4ad66d061f8f33d9e2e8f3a1b"
+  },
+  "id": "0BjEJ8sM7ZgE7301",
+  "tags": []
+}

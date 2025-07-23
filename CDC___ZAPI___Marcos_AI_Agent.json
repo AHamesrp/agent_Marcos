@@ -1,0 +1,2458 @@
+{
+  "name": "CDC | ZAPI | Marcos AI Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "messageid_casa_canal",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "messageId",
+              "keyValue": "={{ $('setWebhookData').item.json.messageId }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        3940,
+        -760
+      ],
+      "id": "ecbd23f2-c167-460d-8b22-678e941c4a14",
+      "name": "getMessageId",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "EH5tBngtkDzJm9Cg",
+          "name": "Supabase | Casa do Canal"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ce544ae2-df4b-47ef-b33b-4c2fd3d2fcb3",
+              "leftValue": "={{ $json.messageId }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {
+          "ignoreCase": false
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        4160,
+        -760
+      ],
+      "id": "8277e662-6cc5-444a-81df-8da814e9be82",
+      "name": "ifMessageidExists",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        4460,
+        -1060
+      ],
+      "id": "ebedf0d8-bbee-47cd-a8a9-3d8faf9ba67f",
+      "name": "noDuplicataMessage"
+    },
+    {
+      "parameters": {
+        "tableId": "messageid_casa_canal",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "messageId",
+              "fieldValue": "={{ $('setWebhookData').first().json.messageId }}"
+            },
+            {
+              "fieldId": "phone_canon",
+              "fieldValue": "={{ $('setWebhookData').first().json.phone_canon }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        4420,
+        -720
+      ],
+      "id": "509b224e-2258-4dd5-bde6-25cf7c49e54a",
+      "name": "registerMessageId",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "EH5tBngtkDzJm9Cg",
+          "name": "Supabase | Casa do Canal"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "a_leads_casa_canal",
+        "limit": 1,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "phone_canon",
+              "condition": "eq",
+              "keyValue": "={{ $('setWebhookData').item.json.phone_canon }}"
+            },
+            {
+              "keyName": "phone_canon",
+              "condition": "eq",
+              "keyValue": "={{ $('setWebhookData').item.json.original_phone }}"
+            },
+            {
+              "keyName": "phone_last9",
+              "condition": "eq",
+              "keyValue": "={{ $('setWebhookData').item.json.phone_last9 }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        4660,
+        -720
+      ],
+      "id": "abb393ff-f365-4a0f-88da-c091e7d27be5",
+      "name": "getlead",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "EH5tBngtkDzJm9Cg",
+          "name": "Supabase | Casa do Canal"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "01d2db80-6366-4653-96c3-adc1afab5483",
+              "leftValue": "={{ $json.phone_canon }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        4900,
+        -720
+      ],
+      "id": "5221ca57-c00f-4f03-bf9f-d47fbbf23ad7",
+      "name": "ifLeadExists",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('webhookCasaCanal').first().json.body.text.message }}",
+                    "rightValue": "null",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEmpty",
+                      "singleValue": true
+                    },
+                    "id": "0f1bd05a-de71-4c27-bad9-9e975f340952"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "texto"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "0a835e92-eb09-4d30-8908-7e344759484a",
+                    "leftValue": "={{ $('webhookCasaCanal').first().json.body.image.imageUrl\n}}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEmpty",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "imagem"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "bcbf6b31-dd36-42cc-ae27-2b828ba9824e",
+                    "leftValue": "={{ $('webhookCasaCanal').first().json.body.audio.audioUrl\n}}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEmpty",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "audio"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        2820,
+        20
+      ],
+      "id": "254d7763-33b7-4aa8-b8a4-08fc3b5aac6c",
+      "name": "Switch Tipo de Mensagem",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "text": "={{ $('setWebhookData').item.json.image_caption }}",
+        "imageUrls": "={{ $('setWebhookData').item.json.image }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        3140,
+        20
+      ],
+      "id": "02924f42-c92c-4085-a8ee-773ded3001a4",
+      "name": "Analisa imagem",
+      "credentials": {
+        "openAiApi": {
+          "id": "XocFwX87IjlVYmUq",
+          "name": "OpenAI | LW"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        3260,
+        240
+      ],
+      "id": "dda4ce1f-870d-4537-9a21-6cbbee7b3fe0",
+      "name": "Transcrever Audio",
+      "credentials": {
+        "openAiApi": {
+          "id": "XocFwX87IjlVYmUq",
+          "name": "OpenAI | LW"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $('setWebhookData').item.json.audio }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3060,
+        240
+      ],
+      "id": "b9c7a1ee-7e77-4c10-9d52-7e753aca114a",
+      "name": "download audio"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "bc37b42f-cf4a-48b4-be29-38c0d01e8ed1",
+              "name": "text_message",
+              "value": "={{ $('setWebhookData').item.json.text_message }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3240,
+        -220
+      ],
+      "id": "b9672823-13f9-4718-be0f-a4e34d6006f1",
+      "name": "textoMsg"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "465c72f3-4d07-4559-ba3a-1bd5ece27ffc",
+              "name": "Mensagem",
+              "value": "=Descrição da imagem: {{ $json.content }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3360,
+        20
+      ],
+      "id": "ff231a26-31e6-42f6-9ede-09c34eb13fce",
+      "name": "imagemMsg"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "24c9aa3d-cd88-4433-9096-da6b020c5f34",
+              "name": "Mensagem",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3440,
+        240
+      ],
+      "id": "dc154838-6a1c-479a-9349-02d141cc3d78",
+      "name": "audioMsg"
+    },
+    {
+      "parameters": {
+        "content": "# Audio\n# Texto\n# Imagem",
+        "height": 673,
+        "width": 1112,
+        "color": 6
+      },
+      "id": "884e65a3-9411-4a7b-b3f5-20df460d3317",
+      "name": "Sticky Note9",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2780,
+        -260
+      ]
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        3700,
+        20
+      ],
+      "id": "6e8744b9-8492-4a3c-8a49-cc46a33675ac",
+      "name": "mergeProcessedMessage1"
+    },
+    {
+      "parameters": {
+        "tableId": "a_leads_casa_canal",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "phone_canon",
+              "fieldValue": "={{ $('setWebhookData').first().json.phone_canon }}"
+            },
+            {
+              "fieldId": "original_phone",
+              "fieldValue": "={{ $('setWebhookData').item.json.original_phone }}"
+            },
+            {
+              "fieldId": "phone_last9",
+              "fieldValue": "={{ $('setWebhookData').item.json.phone_last9 }}"
+            },
+            {
+              "fieldId": "data_primeiro_contato",
+              "fieldValue": "={{ $now }}"
+            },
+            {
+              "fieldId": "created_at",
+              "fieldValue": "={{ $now }}"
+            },
+            {
+              "fieldId": "updated_at",
+              "fieldValue": "={{ $now }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        5100,
+        -600
+      ],
+      "id": "c08b6839-12b2-45b6-9c89-6f0016a0ad4f",
+      "name": "createLead",
+      "credentials": {
+        "supabaseApi": {
+          "id": "EH5tBngtkDzJm9Cg",
+          "name": "Supabase | Casa do Canal"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "={{ $json.msg.phone }}",
+        "messageData": "={{ JSON.stringify($json.msg) }}",
+        "tail": true
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        4380,
+        0
+      ],
+      "id": "47103651-25ff-4622-9ec5-eda50177413f",
+      "name": "pushBuffer",
+      "credentials": {
+        "redis": {
+          "id": "aametORjDP4m6fAt",
+          "name": "Redis 2growAI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "list_array",
+        "key": "={{ $('setBuffer').item.json.msg.phone }}",
+        "keyType": "list",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        4820,
+        0
+      ],
+      "id": "75169e13-6d2e-4a6b-818d-728e984b438a",
+      "name": "getMessageBuffer",
+      "credentials": {
+        "redis": {
+          "id": "aametORjDP4m6fAt",
+          "name": "Redis 2growAI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "684b92e0-b83b-4dd6-b716-f3f407484979",
+              "name": "msg.phone",
+              "value": "={{ $('setWebhookData').first().json.phone_canon }}",
+              "type": "string"
+            },
+            {
+              "id": "e96943ed-56de-456d-bfdc-6553a81b99d6",
+              "name": "msg.messageId",
+              "value": "={{ $('setWebhookData').first().json.messageId }}",
+              "type": "string"
+            },
+            {
+              "id": "52a6bfa1-3132-4d57-97ed-93797eecbc26",
+              "name": "msg.text_message",
+              "value": "={{ $json.text_message }}",
+              "type": "string"
+            },
+            {
+              "id": "ff2724bb-7bb1-425d-819f-22d1e9c706af",
+              "name": "msg.timestamp",
+              "value": "={{ $now }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4160,
+        0
+      ],
+      "id": "c16324df-defe-4cb7-b307-01333b05555a",
+      "name": "setBuffer",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "={{ $('setBuffer').item.json.msg.phone }}"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        5600,
+        260
+      ],
+      "id": "b568e3bc-e9a3-4c85-8c30-c97f4239333b",
+      "name": "deleteBuffer",
+      "credentials": {
+        "redis": {
+          "id": "aametORjDP4m6fAt",
+          "name": "Redis 2growAI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "043d8487-f39e-4bb1-8443-cfc7fc6f17b8",
+                    "leftValue": "={{ JSON.parse($json.list_array.first()).messageId }}",
+                    "rightValue": "={{ $('setBuffer').item.json.msg.messageId }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEquals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Nada a fazer"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "aacfcfe3-77d6-4fe0-a2ee-3a53728129a0",
+                    "leftValue": "={{ JSON.parse($json.list_array.last()).timestamp }}",
+                    "rightValue": "={{ $now.minus(5, 'seconds') }}",
+                    "operator": {
+                      "type": "dateTime",
+                      "operation": "before"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Prosseguir"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "esperar"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        5060,
+        0
+      ],
+      "id": "aef096a0-9a6c-49e5-baac-cf0d0a88b218",
+      "name": "Switch3"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        5320,
+        -200
+      ],
+      "id": "d9cd6000-cec5-4347-9b4f-4cce391b9af3",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        5240,
+        220
+      ],
+      "id": "6b54cc84-25a4-4cc6-81dd-a571763cef2f",
+      "name": "Wait1",
+      "webhookId": "348779c2-cf5a-44fc-b736-df1778f4482f"
+    },
+    {
+      "parameters": {
+        "content": "# Buffer\n",
+        "height": 713,
+        "width": 1772,
+        "color": 6
+      },
+      "id": "cf930561-3617-4083-b1f7-0bbbdb300eb0",
+      "name": "Sticky Note11",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4000,
+        -280
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "00c920ae-7410-4b57-894d-71400d01da27",
+              "name": "text_message",
+              "value": "={{ $json.list_array.map(valor => JSON.parse(valor).text_message).join('\\n') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2780,
+        640
+      ],
+      "id": "925e38a2-725e-4ff6-8e9c-fc2a66357bb7",
+      "name": "concatenacao"
+    },
+    {
+      "parameters": {
+        "content": "[\n  {\n    \"headers\": {\n      \"host\": \"hook.2growai.com.br\",\n      \"user-agent\": \"Mozilla/5.0 (Linux; Android 10; SM-A205U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.5563.115 Mobile Safari/537.36\",\n      \"content-length\": \"730\",\n      \"content-type\": \"application/json\",\n      \"origin\": \"https://api.z-api.io\",\n      \"server\": \"Z-API\",\n      \"x-forwarded-for\": \"168.75.102.34\",\n      \"x-forwarded-host\": \"hook.2growai.com.br\",\n      \"x-forwarded-port\": \"443\",\n      \"x-forwarded-proto\": \"https\",\n      \"x-forwarded-server\": \"f188c1474582\",\n      \"x-real-ip\": \"168.75.102.34\",\n      \"z-api-token\": \"5486A2672166B515C7281107\",\n      \"accept-encoding\": \"gzip\"\n    },\n    \"params\": {},\n    \"query\": {},\n    \"body\": {\n      \"isStatusReply\": false,\n      \"chatLid\": \"54584840052848@lid\",\n      \"connectedPhone\": \"554899528592\",\n      \"waitingMessage\": false,\n      \"isEdit\": false,\n      \"isGroup\": false,\n      \"isNewsletter\": false,\n      \"instanceId\": \"3DF14D56A48B704417FD32C54B267657\",\n      \"messageId\": \"3A46C7D745C7A1072D88\",\n      \"phone\": \"5548999292165\",\n      \"fromMe\": false,\n      \"momment\": 1751043647000,\n      \"status\": \"RECEIVED\",\n      \"chatName\": \"Arthur Hames\",\n      \"senderPhoto\": null,\n      \"senderName\": \"Arthur Hames\",\n      \"photo\": \"https://pps.whatsapp.net/v/t61.24694-24/322981722_908501861351779_1600601938880328973_n.jpg?ccb=11-4&oh=01_Q5Aa1wFuVhX9ahygwMylRBiggNtH4Xh54VL7j8i5WcN_vTQ5cA&oe=686BE6AF&_nc_sid=5e03e0&_nc_cat=109\",\n      \"broadcast\": false,\n      \"participantLid\": null,\n      \"forwarded\": false,\n      \"type\": \"ReceivedCallback\",\n      \"fromApi\": false,\n      \"text\": {\n        \"message\": \"Opa\"\n      }\n    },\n    \"webhookUrl\": \"https://hook.2growai.com.br/webhook/casaDoCanal\",\n    \"executionMode\": \"production\"\n  }\n]",
+        "height": 1480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -840,
+        -1380
+      ],
+      "id": "63428b81-7acb-4fed-8ec0-977ae53d0494",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "key": "5548999292165",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -460,
+        -900
+      ],
+      "id": "701ec565-8f06-4368-8f4e-b18b0a229e86",
+      "name": "Redis1",
+      "credentials": {
+        "redis": {
+          "id": "aametORjDP4m6fAt",
+          "name": "Redis 2growAI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "options": {
+          "responseFormat": "text",
+          "temperature": 0.2
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        2880,
+        1520
+      ],
+      "id": "ec1b6b1d-2165-4df9-bb97-ab9ec4a95b4a",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "XocFwX87IjlVYmUq",
+          "name": "OpenAI | LW"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# AI AGENT MARCOS - ATENDIMENTO\n\n",
+        "height": 753,
+        "width": 1632,
+        "color": 5
+      },
+      "id": "cb9c6765-c646-43fa-9f93-93d4c3e87126",
+      "name": "Sticky Note26",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2760,
+        960
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ab15aa97-b4d7-483b-ab9f-dad29288a00b",
+              "name": "output",
+              "value": "={{ $json.output.split(\"\\n\\n\") }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4600,
+        1440
+      ],
+      "id": "fb8ecb1b-e1bc-4b47-b8c0-5a3b883bf1af",
+      "name": "arrayOutput"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "output",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        4840,
+        1440
+      ],
+      "id": "fd720b4a-0ea6-444a-a8c8-0fef7314781f",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        5120,
+        1440
+      ],
+      "id": "e9583f2b-d675-47c8-98a4-4a5321d420c8",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        5820,
+        1580
+      ],
+      "id": "4c1e78da-a547-4f64-80c5-8771d8685ee8",
+      "name": "Wait",
+      "webhookId": "5af9c5ea-8f7d-4cbd-93f9-f9a07ce16446"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('setDataForMarcos').item.json.phone_canon }}",
+        "tableName": "cdc_chat_histories",
+        "contextWindowLength": 50
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        3140,
+        1520
+      ],
+      "id": "e20a0cfc-9b7f-4337-9ec6-077520e39afd",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "ST0F1m4sALDkjfR1",
+          "name": "Postgres | Casa do Canal"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b2745c1b-4179-4539-aaf5-2f378b3b4ab1",
+              "name": "delayTyping",
+              "value": "={{ Math.min( ($json.output || '').length * 90, 2200 ) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        5380,
+        1460
+      ],
+      "id": "4919d23f-59a2-44fb-93ce-36750dc6b2ce",
+      "name": "delayTyping"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.z-api.io/instances/3DF14D56A48B704417FD32C54B267657/token/5486A2672166B515C7281107/send-text",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "phone",
+              "value": "={{ $('setDataForMarcos').first().json.phone_canon }}"
+            },
+            {
+              "name": "message",
+              "value": "={{ $('Loop Over Items').item.json.output }}"
+            },
+            {
+              "name": "delayTyping",
+              "value": "={{ $json.delayTyping }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9866ce20-7d68-4b6d-89cf-0aad1bccf04d",
+      "name": "Com Delay",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        5620,
+        1460
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "fYXvxho6l90yBetP",
+          "name": "Z API | PVSC | Casa do Canal | Rooftop | EmergencIA"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "key": "={{ $('setWebhookData').first().json.phone_canon }}-memory-long",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        4900,
+        660
+      ],
+      "id": "738399f0-76bb-4ad9-8507-661c5072bc5b",
+      "name": "Redis",
+      "executeOnce": true,
+      "credentials": {
+        "redis": {
+          "id": "aametORjDP4m6fAt",
+          "name": "Redis 2growAI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "cdc_conversation_interactions",
+        "limit": 5,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "phone_canon",
+              "condition": "eq",
+              "keyValue": "={{ $('setWebhookData').first().json.phone_canon }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        3040,
+        640
+      ],
+      "id": "8183f2ee-d742-41ce-ade1-f0910bfba466",
+      "name": "getRecentInteractions",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "EH5tBngtkDzJm9Cg",
+          "name": "Supabase | Casa do Canal"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# Atualiza a última mensagem que o Agente Enviou\n",
+        "height": 392,
+        "width": 1308,
+        "color": 4
+      },
+      "id": "215fde2e-5504-4081-a575-c05770230369",
+      "name": "Sticky Note6",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4560,
+        900
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Formatar últimas 5 interações para o user prompt\nconst interactions = $('getRecentInteractions').all();\n\nif (interactions.length === 0) {\n  return [{ json: { formatted_interactions: 'Nenhuma interação anterior registrada.' } }];\n}\n\nconst formatLabels = [\n  'Interação mais recente:',\n  '2ª interação mais recente:',\n  '3ª interação mais recente:', \n  '4ª interação mais recente:',\n  '5ª interação mais recente:'\n];\n\n// Ordenar por created_at DESC (mais recente primeiro)\nconst sortedInteractions = interactions.sort((a, b) => \n  new Date(b.json.created_at) - new Date(a.json.created_at)\n);\n\nlet formatted = '';\n\nsortedInteractions.forEach((interaction, index) => {\n  const data = interaction.json;\n  \n  formatted += `# ${formatLabels[index]}\\n`;\n  formatted += `Mensagem do agente: ${data.agent_message}\\n`;\n  formatted += `Timestamp: ${data.agent_timestamp_formatted}\\n`;\n  formatted += `Enviado por: ${data.agent_name}\\n\\n`;\n  \n  if (data.user_message && data.user_message.trim() !== '') {\n    formatted += `Resposta do usuário: ${data.user_message}\\n`;\n    formatted += `Timestamp: ${data.user_timestamp_formatted}\\n\\n`;\n  } else {\n    formatted += `Resposta do usuário: [AGUARDANDO RESPOSTA]\\n`;\n    formatted += `Timestamp: [PENDENTE]\\n\\n`;\n  }\n});\n\nreturn [{ json: { formatted_interactions: formatted.trim() } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4480,
+        660
+      ],
+      "id": "b6c13cf4-46f7-4f00-b7d2-af64f28b335a",
+      "name": "formatInteractions"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Atualizar interação pendente com resposta do usuário\nconst userMessage = $('concatenacao').item.json.text_message;\nconst phoneCanon = $('setWebhookData').item.json.phone_canon;\n\n// Gerar timestamp formatado para SP\nconst now = new Date();\nconst spTimeFormatted = now.toLocaleString('pt-BR', {\n  timeZone: 'America/Sao_Paulo',\n  day: '2-digit',\n  month: '2-digit', \n  year: 'numeric',\n  hour: '2-digit',\n  minute: '2-digit',\n  second: '2-digit'\n}).replace(',', ' -');\n\nreturn [{\n  json: {\n    phone_canon: phoneCanon,\n    user_message: userMessage,\n    user_timestamp_formatted: spTimeFormatted,\n    user_timestamp: now.toISOString()\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3360,
+        640
+      ],
+      "id": "9dc1e108-965e-43d6-bb47-1c5cd909678b",
+      "name": "updateUserResponse"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Encontrar a interação mais recente sem resposta do usuário\nconst interactions = $('getRecentInteractions').all();\nconst userResponseData = $('updateUserResponse').item.json;\n\n// Filtrar interações sem resposta e encontrar a mais recente\nconst pendingInteractions = interactions.filter(item => \n  item.json.user_message === null || item.json.user_message === ''\n);\n\nif (pendingInteractions.length === 0) {\n  // Nenhuma interação pendente - usuário pode estar respondendo algo muito antigo\n  return [{ json: { no_update_needed: true } }];\n}\n\n// Ordenar por created_at DESC e pegar a primeira (mais recente por timestamp)\nconst latestPending = pendingInteractions.sort((a, b) => \n  new Date(b.json.created_at) - new Date(a.json.created_at)\n)[0];\n\nreturn [{\n  json: {\n    ...userResponseData,\n    interaction_id: latestPending.json.id,\n    interaction_sequence: latestPending.json.interaction_sequence\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3640,
+        640
+      ],
+      "id": "8fafadca-5613-42a4-a6c6-0f3b1730e1fd",
+      "name": "findLatestPendingInteraction"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "cdc_conversation_interactions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $('findLatestPendingInteraction').item.json.interaction_id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "user_message",
+              "fieldValue": "={{ $('findLatestPendingInteraction').item.json.user_message }}"
+            },
+            {
+              "fieldId": "user_timestamp",
+              "fieldValue": "={{ $('findLatestPendingInteraction').item.json.user_timestamp }}"
+            },
+            {
+              "fieldId": "user_timestamp_formatted",
+              "fieldValue": "={{ $('findLatestPendingInteraction').item.json.user_timestamp_formatted }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        4180,
+        520
+      ],
+      "id": "ee170841-4d75-4fb5-905e-36733ad5ed4f",
+      "name": "updateSpecificInteraction",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "EH5tBngtkDzJm9Cg",
+          "name": "Supabase | Casa do Canal"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c77d829e-6d28-4eb9-af5b-a59fae3aa45c",
+              "leftValue": "={{ $json.no_update_needed }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3880,
+        640
+      ],
+      "id": "2eb8d809-5a8b-4ce7-8aa4-8d0ef3beb387",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Preparar dados para nova interação do agente Marcos\nconst phoneCanon = $('setWebhookData').first().json.phone_canon;\nconst agentMessage = $('AI Agent - Marcos Atendimento').item.json.output;\nconst agentName = 'Marcos - Agente Atendimento';\n\n// Gerar timestamp formatado para SP\nconst now = new Date();\nconst spTimeFormatted = now.toLocaleString('pt-BR', {\n  timeZone: 'America/Sao_Paulo',\n  day: '2-digit',\n  month: '2-digit', \n  year: 'numeric',\n  hour: '2-digit',\n  minute: '2-digit',\n  second: '2-digit'\n}).replace(',', ' -');\n\nreturn [{\n  json: {\n    phone_canon: phoneCanon,\n    agent_message: agentMessage,\n    agent_name: agentName,\n    agent_timestamp_formatted: spTimeFormatted\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4620,
+        1080
+      ],
+      "id": "aae7fc2e-2eaa-4d55-bd9b-237bb3aa218d",
+      "name": "prepareNewInteraction"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Nova lógica: sempre sequence 1 para nova mensagem\nconst newInteractionData = $('prepareNewInteraction').first().json;\n\n// Nova mensagem SEMPRE vai para sequence 1\nconst nextSequence = 1;\n\nreturn [{\n  json: {\n    ...newInteractionData,\n    interaction_sequence: nextSequence\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4840,
+        1080
+      ],
+      "id": "f4fbd0a8-5a5d-4787-9063-a25a98f6ba0b",
+      "name": "calculateNextSequence"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Usar dados já disponíveis de getRecentInteractions\nconst allInteractions = $('getRecentInteractions').all();\nconst newInteractionData = $('calculateNextSequence').first().json;\n\nif (allInteractions.length >= 5) {\n  // Encontrar a interação mais antiga (menor created_at)\n  const oldestInteraction = allInteractions.sort((a, b) => \n    new Date(a.json.created_at) - new Date(b.json.created_at)\n  )[0];\n  \n  return [{\n    json: {\n      ...newInteractionData,\n      should_delete: true,\n      delete_id: oldestInteraction.json.id\n    }\n  }];\n} else {\n  return [{\n    json: {\n      ...newInteractionData,\n      should_delete: false\n    }\n  }];\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5060,
+        1080
+      ],
+      "id": "6fb17ac8-4c2a-4f1f-993a-de4ba3e25c44",
+      "name": "findOldestInteraction"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "tableId": "cdc_conversation_interactions",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "phone_canon",
+              "condition": "eq",
+              "keyValue": "={{ $('findOldestInteraction').item.json.phone_canon }}"
+            },
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $json.delete_id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        5440,
+        980
+      ],
+      "id": "5257f9fc-40c8-44a2-88d9-44d371fb6cc3",
+      "name": "deleteOldInteraction",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "EH5tBngtkDzJm9Cg",
+          "name": "Supabase | Casa do Canal"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "cdc_conversation_interactions",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "phone_canon",
+              "fieldValue": "={{ $('findOldestInteraction').item.json.phone_canon }}"
+            },
+            {
+              "fieldId": "interaction_sequence",
+              "fieldValue": "={{ $('findOldestInteraction').item.json.interaction_sequence }}"
+            },
+            {
+              "fieldId": "agent_message",
+              "fieldValue": "={{ $('findOldestInteraction').item.json.agent_message }}"
+            },
+            {
+              "fieldId": "agent_name",
+              "fieldValue": "={{ $('findOldestInteraction').item.json.agent_name }}"
+            },
+            {
+              "fieldId": "agent_timestamp",
+              "fieldValue": "={{ $now }}"
+            },
+            {
+              "fieldId": "agent_timestamp_formatted",
+              "fieldValue": "={{ $('findOldestInteraction').item.json.agent_timestamp_formatted }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        5660,
+        1100
+      ],
+      "id": "b9485fc0-d548-4425-927c-ff5228a25203",
+      "name": "insertNewInteraction",
+      "credentials": {
+        "supabaseApi": {
+          "id": "EH5tBngtkDzJm9Cg",
+          "name": "Supabase | Casa do Canal"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c77d829e-6d28-4eb9-af5b-a59fae3aa45c",
+              "leftValue": "={{ $('findOldestInteraction').item.json.should_delete }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        5240,
+        1080
+      ],
+      "id": "205d78ca-ad17-475a-8b58-38b640f7fc62",
+      "name": "checkShouldDelete"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=# NOME DO USUÁRIO: {{ $json.nome }}\n\n----------------\n\n# MENSAGEM ATUAL DO USUÁRIO: \n<user_message>\n\n* Responda esta mensagem específica, jamais ignore o que o usuário disse:\n\n{{ $json.message }}\n\n</user_message>\n\n----------------\n\n# HISTÓRICO DE INTERAÇÕES RECENTES (MEMÓRIA DE CURTO PRAZO)\n<last_5_interactions>\n\n* ANÁLISE OBRIGATÓRIA: Verificar agente anterior, detectar padrões repetidos (palavras, nome, emojis, estruturas), VARIAR tudo para evitar robotização e repetição:\n\n{{ $json.recent_interactions }}\n\n</last_5_interactions>\n\n----------------\n\n# CONTEXTO DO USUÁRIO (DOSSIÊ CASA DO CANAL)\n<user_context>\n\n* Use para personalização profunda e continuidade relacional baseada no relacionamento estabelecido e nas informações coletadas sobre o usuárioe no que ele procura/procurou em relação a casa do canal:\n\n{{ $json.userContext }}\n\n</user_context>\n\n----------------\n\n\n# DIA E HORÁRIO DE AGORA: {{ new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }).replace(',', '') }}\n\n",
+        "options": {
+          "systemMessage": "=<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<agent_marcos>\n  <identity>\n    <name>Marcos</name>\n    <role>Consultor especializado em hospedagem da Casa do Canal</role>\n    <personality>\n      Profissional, acolhedor, consultivo e confiante. Adapta comunicação ao perfil do lead (família, casal, amigos). \n      NUNCA menciona ser IA - sempre se apresenta como Marcos, consultor da Casa do Canal.\n    </personality>\n  </identity>\n\n  <property_info>\n    <casa_do_canal>\n      <capacity>Até 12 pessoas confortavelmente</capacity>\n      <location>300m da praia</location>\n      <amenities>\n        <item>Piscina privativa</item>\n        <item>Churrasqueira profissional</item>\n        <item>Cozinha completa</item>\n        <item>Ar condicionado todos ambientes</item>\n        <item>Wi-Fi</item>\n        <item>TV</item>\n        <item>Sala ampla</item>\n        <item>Roupas de cama e banho incluídas</item>\n      </amenities>\n    </casa_do_canal>\n    \n    <pricing_policy>\n      <cleaning_fee>R$700 (fixa, independente do período)</cleaning_fee>\n      <minimum_nights>Varia conforme temporada (3-7 noites)</minimum_nights>\n      <rate_examples>\n        <low_season>R$2.500-3.000/noite</low_season>\n        <mid_season>R$3.500-4.500/noite</mid_season>\n        <high_season>R$5.000-6.000/noite</high_season>\n      </rate_examples>\n    </pricing_policy>\n  </property_info>\n\n  <conversation_flow>\n    <greeting>\n      <template>\n        Olá! Sou Marcos da Casa do Canal 😊\n\n        Muito obrigado pelo interesse! Para te ajudar melhor, me conta: vocês estão pensando em qual período e quantas pessoas seriam?\n      </template>\n    </greeting>\n\n    <information_collection>\n      <priority_data>\n        <item>Período de interesse (datas específicas ou época)</item>\n        <item>Número de pessoas</item>\n        <item>Ocasião especial ou motivo da viagem</item>\n        <item>Nome do lead</item>\n        <item>Orçamento aproximado</item>\n      </priority_data>\n    </information_collection>\n\n    <price_presentation>\n      <format>\n        Para [período mencionado]:\n        \n        • R$[valor]/noite\n        • Taxa de faxina: R$700 (roupas de cama/banho incluídas)  \n        • Mínimo: [X] noites\n        • **Total [X] noites: R$[total]**\n\n        A casa acomoda [número] pessoas com total conforto! 🏡\n      </format>\n    </price_presentation>\n  </conversation_flow>\n\n  <response_patterns>\n    <inquiry_types>\n      <price_inquiry>\n        <triggers>\n          <item>quanto custa</item>\n          <item>qual o preço</item>\n          <item>valores</item>\n          <item>valor para</item>\n          <item>custo</item>\n          <item>orçamento</item>\n        </triggers>\n        <response_strategy>\n          1. Perguntar período e número de pessoas se não informado\n          2. Apresentar valores estruturados com taxa de faxina\n          3. Destacar benefícios e diferenciais\n          4. Mostrar custo por pessoa para grupos\n        </response_strategy>\n      </price_inquiry>\n\n      <availability_inquiry>\n        <triggers>\n          <item>está disponível</item>\n          <item>tem vaga</item>\n          <item>está livre</item>\n          <item>disponibilidade</item>\n          <item>consegue para</item>\n        </triggers>\n        <response_strategy>\n          1. Confirmar período específico\n          2. Informar disponibilidade\n          3. Se ocupado, sugerir datas próximas\n          4. Criar urgência sutil baseada na procura\n        </response_strategy>\n      </availability_inquiry>\n\n      <property_inquiry>\n        <triggers>\n          <item>como é a casa</item>\n          <item>quantos quartos</item>\n          <item>tem piscina</item>\n          <item>comodidades</item>\n          <item>estrutura</item>\n          <item>localização</item>\n        </triggers>\n        <response_strategy>\n          1. Destacar principais características\n          2. Mencionar capacidade e localização\n          3. Listar comodidades relevantes\n          4. Conectar com necessidades do grupo\n        </response_strategy>\n      </property_inquiry>\n    </inquiry_types>\n\n    <objection_handling>\n      <high_price>\n        <response>\n          Entendo sua preocupação com o valor. Vamos ver juntos: dividindo pelos [X] de vocês, fica R$[valor] por pessoa para [X] dias completos.\n\n          Isso inclui:\n          ✨ Casa completa só para vocês\n          ✨ Localização privilegiada a 300m da praia\n          ✨ Todas comodidades (piscina, churrasqueira, cozinha)\n          ✨ Economia em restaurantes com cozinha equipada\n\n          Muitas vezes sai mais barato que hotel + refeições, e vocês têm muito mais privacidade! Faz sentido?\n        </response>\n      </high_price>\n\n      <minimum_nights>\n        <response>\n          O mínimo de [X] noites garante que vocês tenham tempo suficiente para relaxar e aproveitar realmente a experiência da casa e da região.\n\n          Muitos hóspedes nos agradecem depois, porque conseguem desacelerar do ritmo da cidade. Vocês têm flexibilidade com as datas para encaixar o mínimo?\n        </response>\n      </minimum_nights>\n\n      <cleaning_fee>\n        <response>\n          A taxa de faxina de R$700 garante que vocês recebam a casa impecável, com roupas de cama e banho limpas e limpeza profunda.\n\n          É um valor fixo independente do período, então para estadias mais longas fica ainda mais diluído. É nosso compromisso com a qualidade!\n        </response>\n      </cleaning_fee>\n    </objection_handling>\n  </response_patterns>\n\n  <qualification_process>\n    <lead_scoring>\n      <high_interest_signals>\n        <item>Menciona datas específicas</item>\n        <item>Pergunta sobre processo de reserva</item>\n        <item>Questiona formas de pagamento</item>\n        <item>Expressa urgência</item>\n        <item>Menciona decisão em grupo</item>\n      </high_interest_signals>\n\n      <qualification_questions>\n        <item>Para qual período vocês estão pensando?</item>\n        <item>Quantas pessoas vão se hospedar?</item>\n        <item>É para alguma ocasião especial?</item>\n        <item>Qual o cronograma para definir a viagem?</item>\n        <item>Já ficaram em casas de temporada antes?</item>\n      </qualification_questions>\n    </lead_scoring>\n  </qualification_process>\n\n  <communication_rules>\n    <tone>Profissional mas caloroso, consultivo, adaptável ao perfil do lead</tone>\n    <format>\n      <item>Mensagens concisas para WhatsApp</item>\n      <item>Uso moderado de emojis (🏖️ 🏡 ✨ 📅)</item>\n      <item>Uma mensagem por vez, aguardar respostas</item>\n      <item>Quebras de linha para facilitar leitura</item>\n    </format>\n    <personalization>\n      <item>Usar nome do lead quando disponível</item>\n      <item>Referenciar informações compartilhadas</item>\n      <item>Adaptar linguagem ao perfil (família, casal, amigos)</item>\n      <item>Conectar características da casa às necessidades</item>\n    </personalization>\n  </communication_rules>\n\n  <sample_responses>\n    <first_contact>\n      <user>A casa acomoda até 12 pessoas, com piscina privativa, churrasqueira profissional e cozinha completa. Fica a 300m da praia, com sala ampla e ar condicionado em todos os ambientes. Para quantas pessoas seria a reserva?</user>\n      <marcos>\n        Olá! Sou Marcos da Casa do Canal 😊\n\n        Que bom que entendeu! Para te passar os valores mais precisos, me conta: vocês estão pensando em qual período? E confirma que são para quantas pessoas?\n\n        Assim consigo verificar disponibilidade e valores exatos para vocês!\n      </marcos>\n    </first_contact>\n\n    <price_inquiry>\n      <user>12 a 20 de agosto, 10 pessoas</user>\n      <marcos>\n        Perfeito! Para 12 a 20 de agosto (8 noites) com 10 pessoas:\n\n        • R$3.500/noite (média temporada)\n        • Taxa de faxina: R$700 (roupas de cama/banho incluídas)\n        • **Total 8 noites: R$28.700**\n\n        Dividindo pelas 10 pessoas = R$2.870 por pessoa para 8 dias completos!\n\n        A casa é perfeita para o grupo de vocês 🏡 Posso te contar mais sobre a estrutura?\n      </marcos>\n    </price_inquiry>\n\n    <objection_price>\n      <user>Nossa, está bem caro isso</user>\n      <marcos>\n        Entendo! Vamos ver juntos: dividindo pelos 10 de vocês, fica R$2.870 por pessoa para 8 dias completos.\n\n        Isso inclui:\n        ✨ Casa completa só para vocês\n        ✨ Localização privilegiada a 300m da praia  \n        ✨ Piscina privativa + churrasqueira\n        ✨ Economia em restaurantes com cozinha equipada\n\n        Em hotel individual sairia bem mais caro, e vocês não teriam essa privacidade e liberdade! Faz sentido?\n      </marcos>\n    </objection_price>\n\n    <interest_confirmation>\n      <user>Faz sentido sim. Como fazemos para reservar?</user>\n      <marcos>\n        Que alegria! 🎉 Vocês fizeram uma excelente escolha!\n\n        Vou anotar seus dados e encaminhar para nossa equipe de reservas que vai:\n        ✅ Confirmar disponibilidade em tempo real\n        ✅ Enviar contrato oficial\n        ✅ Orientar sobre formas de pagamento\n        ✅ Finalizar todos os detalhes\n\n        Preciso apenas de um nome completo e telefone para o encaminhamento, pode ser?\n      </marcos>\n    </interest_confirmation>\n\n    <data_collection_and_handoff>\n      <user>arthur hames +54899929165 arthurdasilvahames@gmail.com</user>\n      <marcos>\n        Perfeito, Arthur! Já anotei seus dados:\n        \n        📋 **Resumo da consulta:**\n        • Arthur Hames\n        • 10 a 20 de março, 8 pessoas\n        • Total: R$28.200 (incluindo taxa de faxina)\n        • Contato: +54899929165\n\n        Vou encaminhar agora mesmo para nossa equipe de reservas que vai entrar em contato com você para finalizar tudo oficialmente!\n\n        Eles têm acesso ao sistema de disponibilidade em tempo real e vão te orientar sobre o processo completo. Obrigado pela confiança! 🏡✨\n      </marcos>\n    </data_collection_and_handoff>\n  </sample_responses>\n\n  <operational_rules>\n    <pricing>\n      <rule>SEMPRE incluir taxa de faxina R$700 no total</rule>\n      <rule>Mencionar mínimo de noites para o período</rule>\n      <rule>Mostrar cálculo por pessoa para grupos</rule>\n      <rule>Não oferecer descontos sem autorização</rule>\n    </pricing>\n\n    <reservation_process>\n      <rule>NUNCA finalizar reservas - apenas coletar dados e encaminhar</rule>\n      <rule>Deixar claro que equipe de reservas fará contato oficial</rule>\n      <rule>Coletar: nome completo, telefone, email (se oferecido)</rule>\n      <rule>Fazer resumo dos dados antes de encaminhar</rule>\n      <rule>Agradecer confiança e explicar próximos passos</rule>\n    </reservation_process>\n\n    <handoff_protocol>\n      <when_to_handoff>\n        <item>Lead confirma interesse em reservar</item>\n        <item>Dados de contato coletados</item>\n        <item>Todos detalhes esclarecidos</item>\n        <item>Objeções principais tratadas</item>\n      </when_to_handoff>\n      \n      <handoff_message_template>\n        Perfeito, [Nome]! Já anotei seus dados:\n        \n        📋 **Resumo da consulta:**\n        • [Nome completo]\n        • [Período], [número] pessoas\n        • Total: R$[valor] (incluindo taxa de faxina)\n        • Contato: [telefone/email]\n\n        Vou encaminhar agora mesmo para nossa equipe de reservas que vai entrar em contato para finalizar tudo oficialmente!\n\n        Eles têm acesso ao sistema em tempo real e vão orientar sobre todo o processo. Obrigado pela confiança! 🏡✨\n      </handoff_message_template>\n    </handoff_protocol>\n\n    <availability>\n      <rule>Se período ocupado, sugerir datas próximas</rule>\n      <rule>Criar urgência baseada em procura real</rule>\n      <rule>Oferecer alternativas flexíveis</rule>\n    </availability>\n\n    <data_collection>\n      <rule>Coletar apenas dados necessários para encaminhamento</rule>\n      <rule>Usar informações para personalizar atendimento</rule>\n      <rule>Manter confidencialidade</rule>\n    </data_collection>\n\n    <follow_up>\n      <rule>Aguardar 24-48h após última interação</rule>\n      <rule>Máximo 3 tentativas de reengajamento</rule>\n      <rule>Manter tom consultivo, não pressionar</rule>\n    </follow_up>\n  </operational_rules>\n\n  <special_cases>\n    <large_groups>\n      <condition>Mais de 12 pessoas</condition>\n      <response>Nossa casa acomoda até 12 pessoas com total conforto. Para grupos maiores, posso verificar parcerias com casas próximas. Quantas pessoas seriam exatamente?</response>\n    </large_groups>\n\n    <occupied_period>\n      <condition>Período já reservado</condition>\n      <response>Esse período já está reservado, mas posso verificar datas próximas! Vocês têm flexibilidade? Às vezes uma semana antes ou depois tem disponibilidade e preços melhores!</response>\n    </occupied_period>\n\n    <limited_budget>\n      <condition>Orçamento muito limitado</condition>\n      <response>Entendo que o orçamento é importante! Posso verificar períodos de baixa temporada que ficam mais acessíveis. Vocês teriam flexibilidade com as datas?</response>\n    </limited_budget>\n\n    <comparing_options>\n      <condition>Lead comparando com outras casas</condition>\n      <response>Ótimo que vocês estejam pesquisando bem! A Casa do Canal se destaca pela localização (300m da praia), estrutura completa e atendimento especializado. Que características são mais importantes para vocês?</response>\n    </comparing_options>\n  </special_cases>\n\n  <success_metrics>\n    <conversion_moments>\n      <item>Após apresentar valores dentro do orçamento</item>\n      <item>Quando confirma datas disponíveis de interesse</item>\n      <item>Depois de tratar objeção principal</item>\n      <item>Quando menciona \"só precisa confirmar com grupo\"</item>\n      <item>Ao demonstrar urgência real</item>\n    </conversion_moments>\n\n    <qualification_indicators>\n      <item>Coleta de nome e contato</item>\n      <item>Identificação de datas específicas</item>\n      <item>Definição de número de pessoas</item>\n      <item>Entendimento do orçamento</item>\n      <item>Cronograma de decisão</item>\n    </qualification_indicators>\n  </success_metrics>\n\n  <core_message>\n    Cada interação é uma oportunidade de converter um lead em hóspede da Casa do Canal. \n    Seja genuíno, prestativo e focado em entender e atender as necessidades de cada pessoa. \n    Demonstre expertise, crie confiança e conduza naturalmente para a reserva! 🏡✨\n  </core_message>\n</agent_marcos>",
+          "returnIntermediateSteps": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        3760,
+        1080
+      ],
+      "id": "28ab85da-ead9-4f83-8dc1-dfe442d39288",
+      "name": "AI Agent - Marcos Atendimento",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "58ec9b54-d62a-4cd2-aacd-3ebbe2573b99",
+              "name": "message",
+              "value": "={{ $('concatenacao').first().json.text_message }}",
+              "type": "string"
+            },
+            {
+              "id": "79425af3-e0e2-4174-ad9f-f7ba50a74c62",
+              "name": "nome",
+              "value": "={{ $('setUserData').first().json.nome }}",
+              "type": "string"
+            },
+            {
+              "id": "354638b1-308a-4c0f-bdf5-8ae94ebdf091",
+              "name": "client_id",
+              "value": "={{ $('setUserData').first().json.client_id }}",
+              "type": "string"
+            },
+            {
+              "id": "6458c3d6-e880-4201-aa17-76737484e4d8",
+              "name": "phone_canon",
+              "value": "={{ $('setUserData').first().json.phone_canon }}",
+              "type": "string"
+            },
+            {
+              "id": "d4669eb7-5682-4f05-98d0-c41d5a2e5639",
+              "name": "userContext",
+              "value": "={{ $('Redis').item.json.propertyName }}",
+              "type": "array"
+            },
+            {
+              "id": "f46f1357-44f3-44fd-a286-32cdfc93bc21",
+              "name": "recent_interactions",
+              "value": "={{ $('formatInteractions').first().json.formatted_interactions }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2800,
+        1080
+      ],
+      "id": "b67a70e0-42f9-41f4-9f0e-0e83688be19c",
+      "name": "setDataForMarcos",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "bcb5256f-fdbe-4ea9-921c-e67123d385fc",
+              "name": "client_id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "00d80573-042f-44b4-99f1-1a6f558361bf",
+              "name": "nome",
+              "value": "={{ $json.nome }}",
+              "type": "string"
+            },
+            {
+              "id": "f0cf600e-bb73-4fba-bdbc-78176b89029a",
+              "name": "phone_canon",
+              "value": "={{ $json.phone_canon }}",
+              "type": "string"
+            },
+            {
+              "id": "4ddacd8f-937b-41b7-93db-791bbe2a339d",
+              "name": "email",
+              "value": "={{ $json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "61fd1f54-67e7-452f-9175-be160018af89",
+              "name": "origem",
+              "value": "={{ $json.origem }}",
+              "type": "string"
+            },
+            {
+              "id": "ecd22e78-0d63-442f-b694-74bd2b292e2f",
+              "name": "estado_lead",
+              "value": "={{ $json.estado_lead }}",
+              "type": "string"
+            },
+            {
+              "id": "98a0929c-6f3b-4c53-9616-c8805d380f15",
+              "name": "interesse_demonstrado",
+              "value": "={{ $json.interesse_demonstrado }}",
+              "type": "string"
+            },
+            {
+              "id": "2382faa7-fa10-41bb-b1ca-498703362502",
+              "name": "ultima_interacao",
+              "value": "={{ $json.ultima_interacao }}",
+              "type": "string"
+            },
+            {
+              "id": "6127447e-c86e-4229-b199-fbaddb7dce97",
+              "name": "data_primeiro_contato",
+              "value": "={{ $json.data_primeiro_contato }}",
+              "type": "string"
+            },
+            {
+              "id": "e113abad-053c-4bc8-88be-b0a4c01c09cc",
+              "name": "data_qualificacao",
+              "value": "={{ $json.data_qualificacao }}",
+              "type": "string"
+            },
+            {
+              "id": "35a9e1e3-81ad-461f-80f1-d8229748b5c6",
+              "name": "data_transferencia_lucca",
+              "value": "={{ $json.data_transferencia_lucca }}",
+              "type": "string"
+            },
+            {
+              "id": "b92edc47-662c-40d7-b6fe-8d6b0ce28d8d",
+              "name": "created_at",
+              "value": "={{ $json.created_at }}",
+              "type": "string"
+            },
+            {
+              "id": "2fccebb4-a760-412a-9b38-b3bced9ccc55",
+              "name": "updated_at",
+              "value": "={{ $json.updated_at }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        5500,
+        -580
+      ],
+      "id": "cd717e05-6d68-48aa-84d8-886ebaea216b",
+      "name": "setUserData"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        5300,
+        -720
+      ],
+      "id": "8958fea0-deb5-41a9-b528-59161f452b67",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "70036b68-a245-41a2-9c29-a47a234c3d03",
+              "name": "text_message",
+              "value": "={{ $('webhookCasaCanal').item.json.body.text.message }}",
+              "type": "string"
+            },
+            {
+              "id": "48fece0b-c1c7-459b-9158-b520858014a2",
+              "name": "audio",
+              "value": "={{ $('webhookCasaCanal').item.json.body.audio.audioUrl }}",
+              "type": "string"
+            },
+            {
+              "id": "c2e0d24b-eefe-4afa-bbe3-404b60911af9",
+              "name": "image",
+              "value": "={{ $('webhookCasaCanal').item.json.body.image.imageUrl }}",
+              "type": "string"
+            },
+            {
+              "id": "79178ba7-50e1-4737-a507-8daf4069dbb4",
+              "name": "image_caption",
+              "value": "={{ $('webhookCasaCanal').item.json.body.image.caption }}",
+              "type": "string"
+            },
+            {
+              "id": "1cb5de0b-63b6-430d-8343-95f28a842c16",
+              "name": "messageId",
+              "value": "={{ $('webhookCasaCanal').item.json.body.messageId }}",
+              "type": "string"
+            },
+            {
+              "id": "34f018e7-d7b9-4bb3-aa14-de8d94784498",
+              "name": "phone_canon",
+              "value": "={{ $('canonMain').item.json.phone_canon }}",
+              "type": "string"
+            },
+            {
+              "id": "9f2a7b49-28ca-4c75-a09d-940dba0c8f14",
+              "name": "original_phone",
+              "value": "={{ $('canonMain').item.json.original_phone }}",
+              "type": "string"
+            },
+            {
+              "id": "44ca152a-4534-4119-bb5d-4eadb95e30b8",
+              "name": "phone_last9",
+              "value": "={{ $('canonMain').item.json.phone_last9 }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3680,
+        -760
+      ],
+      "id": "2a50792e-8d4e-4385-8b9e-1b5967fc41d8",
+      "name": "setWebhookData"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "5c652561-06e9-4306-894f-ec4a98c7c50f",
+              "leftValue": "={{ $('webhookCasaCanal').item.json.body.fromMe }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "490386e2-da15-4b1a-99ca-f2f252a34e35",
+              "leftValue": "={{ $('webhookCasaCanal').item.json.body.fromApi }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "e7ab3fed-3656-483b-9833-0b026955af44",
+              "leftValue": "={{ $('webhookCasaCanal').item.json.body.isGroup }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "96f40204-8a9b-4c87-bc9f-66bc81d84e7b",
+              "leftValue": "={{ $('webhookCasaCanal').item.json.body.isNewsletter }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "7b49e8a5-611b-40d2-a39b-f98f0f540e7d",
+              "leftValue": "={{ $('webhookCasaCanal').item.json.body.broadcast }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        3420,
+        -760
+      ],
+      "id": "65852ee2-d138-4af8-a4a7-e89b873c70f1",
+      "name": "filterValidMessages"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7315277f-6a24-4123-a33f-2cf52bbfff66",
+              "name": "phone_canon",
+              "value": "={{ (() => { let p = $json.normalizedPhone; if (p.length === 12) p = p.slice(0,4)+'9'+p.slice(4); return p.length >= 13 ? p : '' })() }}",
+              "type": "string"
+            },
+            {
+              "id": "d2db7f05-96da-48f4-813e-1ab628cf0c7a",
+              "name": "phone_last9",
+              "value": "={{ $json.normalizedPhone.slice(-9) }}",
+              "type": "string"
+            },
+            {
+              "id": "113a7f0a-0050-4153-8950-330051132229",
+              "name": "original_phone",
+              "value": "={{ $json.originalPhone }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b12b4357-2e95-4b28-a7e9-79603cd65d97",
+      "name": "canonMain",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3180,
+        -760
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Acessando o campo phone corretamente dentro do objeto body\nconst originalPhone = $input.item.json.body.phone;\n\n// Verifica se originalPhone existe antes de continuar\nif (!originalPhone) {\n  console.log(\"Número de telefone não encontrado no payload\");\n  // Mantém o objeto original se não encontrar o telefone\n  return $input.item;\n}\n\n// Vamos verificar se precisamos inserir o 9 e onde\nlet normalizedPhone = originalPhone;\n\n// Verifica se o número tem formato brasileiro (começa com 55)\nif (originalPhone.startsWith(\"55\")) {\n  // Extrai o DDD (2 dígitos após o 55)\n  const ddd = originalPhone.substring(2, 4);\n  \n  // Extrai o resto do número\n  const restOfNumber = originalPhone.substring(4);\n  \n  // Se o restante do número tiver 8 dígitos, inserimos o 9\n  if (restOfNumber.length === 8) {\n    normalizedPhone = `55${ddd}9${restOfNumber}`;\n    console.log(`Número normalizado: ${normalizedPhone}`);\n  }\n}\n\n// Mantém o número original nos dados e adiciona o normalizado\n$input.item.json.originalPhone = originalPhone;\n$input.item.json.normalizedPhone = normalizedPhone;\n\nreturn $input.item;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2960,
+        -760
+      ],
+      "id": "46d7392a-5e0e-4a7f-9a75-b25af2d2bf4e",
+      "name": "normalizePhone"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "casa-canal-whatsapp",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        2740,
+        -760
+      ],
+      "id": "fd21b5d8-a6d0-4f0e-8598-fb02b6432bd4",
+      "name": "webhookCasaCanal",
+      "webhookId": "e8f6aa3a-2c5b-4865-9af5-591a892b6402"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "0BjEJ8sM7ZgE7301",
+          "mode": "list",
+          "cachedResultName": "CDC | Valores e Disponibilidade Agent"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "consulta_cliente": "={{ $('setUserData').first().json.phone_canon }}",
+            "phone_canon": "={{ $('concatenacao').first().json.text_message }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "consulta_cliente",
+              "displayName": "consulta_cliente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "phone_canon",
+              "displayName": "phone_canon",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        3400,
+        1520
+      ],
+      "id": "f044b11e-c793-433e-b274-c8e71ca59e79",
+      "name": "Call Agent Valores"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1,
+      "position": [
+        4220,
+        1520
+      ],
+      "id": "173ec11b-e1e2-45bd-810f-838a7db56422",
+      "name": "Think"
+    },
+    {
+      "parameters": {
+        "description": "Se o usuário mencionar que está triste, chame esta tool IMEDIATAMENTE e adicione a informação no campo nova_informacao",
+        "workflowId": {
+          "__rl": true,
+          "value": "OlKmMlbqIb6KndqG",
+          "mode": "list",
+          "cachedResultName": "CDC | Context Manager"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "phone_canon": "={{ $('setDataForMarcos').item.json.phone_canon }}",
+            "nova_informacao": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('nova_informacao', ``, 'string') }}",
+            "agent_name": "Marcos - Atendimento"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "phone_canon",
+              "displayName": "phone_canon",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "nova_informacao",
+              "displayName": "nova_informacao",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "agent_name",
+              "displayName": "agent_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        3600,
+        1520
+      ],
+      "id": "25388dac-787a-4420-a14c-c5b56a6ebc5c",
+      "name": "Call Context Manager"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "getMessageId": {
+      "main": [
+        [
+          {
+            "node": "ifMessageidExists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ifMessageidExists": {
+      "main": [
+        [
+          {
+            "node": "noDuplicataMessage",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "registerMessageId",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "registerMessageId": {
+      "main": [
+        [
+          {
+            "node": "getlead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "getlead": {
+      "main": [
+        [
+          {
+            "node": "ifLeadExists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ifLeadExists": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "createLead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch Tipo de Mensagem": {
+      "main": [
+        [
+          {
+            "node": "textoMsg",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Analisa imagem",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "download audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analisa imagem": {
+      "main": [
+        [
+          {
+            "node": "imagemMsg",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcrever Audio": {
+      "main": [
+        [
+          {
+            "node": "audioMsg",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "download audio": {
+      "main": [
+        [
+          {
+            "node": "Transcrever Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "textoMsg": {
+      "main": [
+        [
+          {
+            "node": "mergeProcessedMessage1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "imagemMsg": {
+      "main": [
+        [
+          {
+            "node": "mergeProcessedMessage1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "audioMsg": {
+      "main": [
+        [
+          {
+            "node": "mergeProcessedMessage1",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "mergeProcessedMessage1": {
+      "main": [
+        [
+          {
+            "node": "setBuffer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "createLead": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "pushBuffer": {
+      "main": [
+        [
+          {
+            "node": "getMessageBuffer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "getMessageBuffer": {
+      "main": [
+        [
+          {
+            "node": "Switch3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "setBuffer": {
+      "main": [
+        [
+          {
+            "node": "pushBuffer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch3": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "deleteBuffer",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "getMessageBuffer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "deleteBuffer": {
+      "main": [
+        [
+          {
+            "node": "concatenacao",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent - Marcos Atendimento",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "arrayOutput": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "delayTyping",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent - Marcos Atendimento",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "delayTyping": {
+      "main": [
+        [
+          {
+            "node": "Com Delay",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Com Delay": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis": {
+      "main": [
+        [
+          {
+            "node": "setDataForMarcos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "getRecentInteractions": {
+      "main": [
+        [
+          {
+            "node": "updateUserResponse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "formatInteractions": {
+      "main": [
+        [
+          {
+            "node": "Redis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "updateUserResponse": {
+      "main": [
+        [
+          {
+            "node": "findLatestPendingInteraction",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "findLatestPendingInteraction": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "updateSpecificInteraction": {
+      "main": [
+        [
+          {
+            "node": "formatInteractions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "updateSpecificInteraction",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "formatInteractions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "prepareNewInteraction": {
+      "main": [
+        [
+          {
+            "node": "calculateNextSequence",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "calculateNextSequence": {
+      "main": [
+        [
+          {
+            "node": "findOldestInteraction",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "findOldestInteraction": {
+      "main": [
+        [
+          {
+            "node": "checkShouldDelete",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "deleteOldInteraction": {
+      "main": [
+        [
+          {
+            "node": "insertNewInteraction",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "checkShouldDelete": {
+      "main": [
+        [
+          {
+            "node": "deleteOldInteraction",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "insertNewInteraction",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "concatenacao": {
+      "main": [
+        [
+          {
+            "node": "getRecentInteractions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent - Marcos Atendimento": {
+      "main": [
+        [
+          {
+            "node": "arrayOutput",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "prepareNewInteraction",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "setDataForMarcos": {
+      "main": [
+        [
+          {
+            "node": "AI Agent - Marcos Atendimento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "setUserData": {
+      "main": [
+        [
+          {
+            "node": "Switch Tipo de Mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "setUserData",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "setWebhookData": {
+      "main": [
+        [
+          {
+            "node": "getMessageId",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "filterValidMessages": {
+      "main": [
+        [
+          {
+            "node": "setWebhookData",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "canonMain": {
+      "main": [
+        [
+          {
+            "node": "filterValidMessages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "normalizePhone": {
+      "main": [
+        [
+          {
+            "node": "canonMain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "webhookCasaCanal": {
+      "main": [
+        [
+          {
+            "node": "normalizePhone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Agent Valores": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent - Marcos Atendimento",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent - Marcos Atendimento",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Context Manager": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent - Marcos Atendimento",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "9ea0aab7-15b5-4688-a03f-7f44aaa87d19",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "35a1a031c5e8e1ff0c9e8fa545d3b65aa09dcbc4ad66d061f8f33d9e2e8f3a1b"
+  },
+  "id": "pVi2osmUBljJJZ20",
+  "tags": []
+}
